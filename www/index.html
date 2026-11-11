@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#B8A9C9">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-<title>Δίπλα σου</title>
+<title>The Pi Helper</title>
 <style>
 :root{
   --paper:#FDFBF7; --mint:#A8DADC; --mint-bg1:#D3EFEB; --mint-bg2:#BCE3DA;
@@ -169,24 +169,63 @@ input[type=range]{width:100%;accent-color:var(--coral-d);min-height:36px}
 .modal .row{justify-content:flex-end}
 .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,30px);background:var(--slate);color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:92vw;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.25)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:linear-gradient(180deg,var(--mint-bg1),var(--mint-bg2));transition:opacity .5s ease,visibility .5s;cursor:pointer}
+#splash.off{opacity:0;visibility:hidden}
+#splash svg{width:min(56vw,250px);height:auto;overflow:visible}
+#splash .ring-bg{fill:none;stroke:#fff;stroke-width:13;opacity:.65}
+#splash .ring{fill:none;stroke:#2F7F73;stroke-width:13;stroke-linecap:round;stroke-dasharray:440;stroke-dashoffset:110;transform:rotate(-90deg);transform-origin:90px 90px;animation:splring 1.7s cubic-bezier(.3,.1,.2,1) both}
+#splash .pi{fill:none;stroke:#1E5A51;stroke-width:12;stroke-linecap:round;stroke-linejoin:round}
+#splash .dot{fill:var(--coral);animation:spldot .5s 1.5s both}
+#splash h2{margin:0;font-weight:800;font-size:clamp(28px,8vw,38px);letter-spacing:.01em;color:#1E5A51;animation:splname .7s .5s both}
+#splash .made{margin:-12px 0 0;font-size:13px;font-weight:700;color:#2F7F73;letter-spacing:.02em;animation:splname .7s .9s both}
+.made.home{text-align:center;color:var(--muted);font-size:12px;font-weight:700;margin:18px 0 4px;opacity:.8}
+@keyframes splring{from{stroke-dashoffset:440}}
+@keyframes spldot{from{opacity:0;transform:scale(0)}}
+@keyframes splname{from{opacity:0;transform:translateY(8px)}}
+.hello{margin:4px 2px 12px;color:var(--ink2);font-size:15px;line-height:1.5}
+.hello b{display:block;color:var(--slate);font-size:20px;font-weight:800;margin-bottom:2px}
+.tiles{display:grid;gap:12px;margin-bottom:16px}
+.tile{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;border-radius:20px;border:2px solid var(--slate);background:var(--paper);color:var(--slate);cursor:pointer;font:inherit;box-shadow:0 4px 0 var(--lav);transition:transform .08s,box-shadow .08s}
+.tile:active{transform:translateY(2px);box-shadow:0 2px 0 var(--lav)}
+.tile .ic{flex:none;width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--mint-bg2);border:2px solid var(--slate)}
+.tile b{display:block;font-size:17px;font-weight:800}
+.tile small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.tile.main{background:var(--coral-d);color:#fff;box-shadow:0 4px 0 #7E2A18}
+.tile.main .ic{background:#fff;color:var(--coral-d);font-weight:800}
+.tile.main small{color:#FFE3DA}
+.tpls{display:grid;gap:8px;margin:-4px 0 16px}
+.tpl{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:16px;border:2px solid var(--slate);background:var(--cream);font:inherit;color:var(--slate);cursor:pointer;text-align:left}
+.tpl span{font-size:22px}.tpl b{flex:1;font-size:15px;font-weight:800}.tpl small{color:var(--muted);font-size:13px}
+.sec{font-size:13px;font-weight:800;color:var(--lav-d);margin:6px 4px 8px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:420px){.ck-btns{grid-template-columns:1fr}.snd{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body data-view="home">
+<div id="splash" role="img" aria-label="The Pi Helper">
+  <svg viewBox="0 0 180 180" aria-hidden="true">
+    <circle class="ring-bg" cx="90" cy="90" r="70"/>
+    <circle class="ring" cx="90" cy="90" r="70"/>
+    <g transform="translate(90,92) scale(.62)"><path class="pi" d="M-48 -38 H48 M-20 -38 L-24 42 M22 -38 V24 Q22 44 44 42"/></g>
+    <circle class="dot" cx="90" cy="20" r="7" style="transform-origin:90px 20px"/>
+  </svg>
+  <h2>The Pi Helper</h2>
+  <p class="made">Made by CultEQ Tinkerlab</p>
+</div>
 <div class="app">
   <div class="topleds"><div class="led"><i></i>CULTEQ</div><div class="spk"><i></i><i></i><i></i></div></div>
   <div class="screen">
   <header class="top">
     <button class="icon" id="btn-back" hidden aria-label="Πίσω">‹</button>
-    <h1 id="title">Δίπλα σου</h1>
+    <h1 id="title">The Pi Helper</h1>
     <button class="icon" id="btn-settings" aria-label="Ρυθμίσεις">⚙</button>
   </header>
   <div id="support-note" class="note warn" hidden></div>
   <main>
     <section id="view-home" class="view">
+      <div id="menu"></div>
       <div id="seq-list"></div>
-      <button class="btn primary wide" id="btn-new">Νέα ακολουθία</button>
+      <p class="made home">Made by CultEQ Tinkerlab</p>
     </section>
 
     <section id="view-edit" class="view" hidden></section>
@@ -276,7 +315,7 @@ const DEFAULT_ALERTS = { mode: 'both', marks: ['start', 'r5', 'r1', 'end'], chec
 const MARKS = [['start', 'Έναρξη'], ['half', 'Στη μέση'], ['r10', '10′ πριν'], ['r5', '5′ πριν'], ['r2', '2′ πριν'], ['r1', '1′ πριν'], ['end', 'Λήξη']];
 const CHECKINS = [[0, 'Όχι'], [5, 'Κάθε 5′'], [10, 'Κάθε 10′'], [15, 'Κάθε 15′'], [20, 'Κάθε 20′']];
 const SOUNDS = [['soft', 'Απαλός'], ['bell', 'Καμπάνα'], ['arcade', 'Arcade'], ['water', 'Νερό']];
-const DEFAULT_SETTINGS = { sound: 'soft', volume: 0.8, rate: 1, voiceURI: '', listen: false, vibrate: true, notify: false, endBehavior: 'ask', wake: true, addMin: 5, lang: 'el', musicListen: 'pause' };
+const DEFAULT_SETTINGS = { sound: 'soft', volume: 0.8, rate: 1, voiceURI: '', listen: false, vibrate: true, notify: false, endBehavior: 'ask', wake: true, addMin: 5, lang: 'en', musicListen: 'pause' };
 const cloneAlerts = a => ({ mode: a.mode, marks: [...a.marks], checkin: a.checkin });
 
 /* ============ τύποι εργασιών και πρόβλεψη (χωρίς AI) ============ */
@@ -410,16 +449,21 @@ function classify(raw, ctx = {}) {
 }
 function classifyAlts(alts, ctx) { for (const a of alts) { const r = classify(a, ctx); if (r) return Object.assign({ text: a }, r); } return null; }
 
+const TEMPLATES = [
+  { icon: '🍽️', name: 'Συγύρισμα κουζίνας', tasks: [['Μάζεμα πιάτων και ποτηριών', 5], ['Πλύσιμο πιάτων', 15], ['Καθάρισμα πάγκου', 5], ['Σκουπίδια', 3]] },
+  { icon: '✉️', name: 'Διοικητικά του πρωινού', breakMin: 2, tasks: [['Απάντηση σε email', 15], ['Λογαριασμοί', 15], ['Τηλεφωνήματα', 10]] },
+  { icon: '☀️', name: 'Πρωινή ρουτίνα', tasks: [['Πρωινό', 15], ['Ντύσιμο', 10], ['Φάρμακα και νερό', 3], ['Στρώσιμο κρεβατιού', 3]] },
+  { icon: '🧺', name: 'Πλυντήριο ρούχων', tasks: [['Μάζεμα ρούχων', 5], ['Φόρτωμα πλυντηρίου', 5], ['Άπλωμα', 10], ['Δίπλωμα', 15]] },
+  { icon: '🛋️', name: 'Γρήγορο συγύρισμα σαλονιού', tasks: [['Μάζεμα πραγμάτων', 8], ['Ξεσκόνισμα', 7], ['Σκούπισμα', 10]] },
+  { icon: '🌙', name: 'Βραδινή ρουτίνα', tasks: [['Ετοιμασία για αύριο', 10], ['Περιποίηση', 10], ['Ηρεμία πριν τον ύπνο', 15]] }
+];
 /* ============ αποθήκευση ============ */
 let S;
 function seedData() {
   const mk = (name, tasks, extra = {}) => Object.assign({ id: uid(), name, breakMin: 0, alerts: cloneAlerts(DEFAULT_ALERTS), tasks: tasks.map(([n, m]) => ({ id: uid(), name: n, minutes: m, type: detectType(n), alerts: null })) }, extra);
   return {
     v: 1, settings: Object.assign({}, DEFAULT_SETTINGS), history: [],
-    sequences: [
-      mk('Συγύρισμα κουζίνας', [['Μάζεμα πιάτων και ποτηριών', 5], ['Πλύσιμο πιάτων', 15], ['Καθάρισμα πάγκου', 5], ['Σκουπίδια', 3]]),
-      mk('Διοικητικά του πρωινού', [['Απάντηση σε email', 15], ['Λογαριασμοί', 15], ['Τηλεφωνήματα', 10]], { breakMin: 2 })
-    ]
+    sequences: []
   };
 }
 function normalizeState(r) {
@@ -638,7 +682,7 @@ const kindOf = k => KIND[k] || 'warn';
 /* ============ ειδοποιήσεις ============ */
 const EV = [];
 function notify(text) {
-  try { if (document.hidden && S.settings.notify && 'Notification' in window && Notification.permission === 'granted') new Notification('Δίπλα σου', { body: text, tag: 'diplasou' }); } catch (e) { }
+  try { if (document.hidden && S.settings.notify && 'Notification' in window && Notification.permission === 'granted') new Notification('The Pi Helper', { body: text, tag: 'diplasou' }); } catch (e) { }
 }
 function feedback(text, kind = 'ask', o = {}) {
   const mode = o.mode || (R ? R.seq.alerts.mode : 'both');
@@ -868,6 +912,12 @@ const EN_UI = {
   'Το μικρόφωνο δεν επιτρέπεται. Δώσε άδεια από τις ρυθμίσεις του προγράμματος περιήγησης.': 'The microphone is not allowed. Grant permission in the browser settings.', 'Η αναγνώριση φωνής χρειάζεται σύνδεση στο διαδίκτυο.': 'Speech recognition needs an internet connection.', 'Δεν βρέθηκε μικρόφωνο.': 'No microphone found.',
   'Γλώσσα': 'Language', 'Η φωνή της εφαρμογής μιλάει προς το παρόν μόνο αγγλικά. Εσύ απαντάς και διαβάζεις στη γλώσσα που διαλέγεις εδώ.': 'The app’s voice speaks English only for now. You read and answer in the language you choose here.',
   'Δεν βρέθηκε αγγλική φωνή στη συσκευή.': 'No English voice found on this device.',
+  'Καλώς ήρθες': 'Welcome', 'Διάλεξε πώς θέλεις να ξεκινήσεις. Όλα αλλάζουν όποτε θες.': 'Choose how you want to start. Everything can be changed any time.',
+  'Φτιάξε τη δική σου, από το μηδέν': 'Build your own from scratch', 'Ξεκίνα από μια ιδέα': 'Start from an idea', 'Έτοιμο σημείο εκκίνησης που προσαρμόζεις': 'A ready starting point you can adjust', 'Οι ακολουθίες μου': 'My sequences',
+  'Πρωινή ρουτίνα': 'Morning routine', 'Πρωινό': 'Breakfast', 'Ντύσιμο': 'Getting dressed', 'Φάρμακα και νερό': 'Meds and water', 'Στρώσιμο κρεβατιού': 'Make the bed',
+  'Πλυντήριο ρούχων': 'Laundry', 'Μάζεμα ρούχων': 'Gather clothes', 'Φόρτωμα πλυντηρίου': 'Load the washer', 'Άπλωμα': 'Hang to dry', 'Δίπλωμα': 'Fold',
+  'Γρήγορο συγύρισμα σαλονιού': 'Quick living room tidy', 'Μάζεμα πραγμάτων': 'Pick things up', 'Ξεσκόνισμα': 'Dusting', 'Σκούπισμα': 'Sweeping',
+  'Βραδινή ρουτίνα': 'Evening routine', 'Ετοιμασία για αύριο': 'Prepare for tomorrow', 'Περιποίηση': 'Self-care', 'Ηρεμία πριν τον ύπνο': 'Wind down before bed',
   'Συγύρισμα κουζίνας': 'Tidy the kitchen', 'Μάζεμα πιάτων και ποτηριών': 'Collect plates and glasses', 'Πλύσιμο πιάτων': 'Wash the dishes', 'Καθάρισμα πάγκου': 'Wipe the counter', 'Σκουπίδια': 'Take out the trash',
   'Διοικητικά του πρωινού': 'Morning admin', 'Απάντηση σε email': 'Answer emails', 'Λογαριασμοί': 'Bills', 'Τηλεφωνήματα': 'Phone calls',
   'Έναρξη_': 'Start', 'Στη μέση': 'Halfway', 'Λήξη': 'End', '10′ πριν': '10′ before', '5′ πριν': '5′ before', '2′ πριν': '2′ before', '1′ πριν': '1′ before', 'Όχι': 'No',
@@ -945,7 +995,7 @@ function trStart() {
 function setLang(l) { S.settings.lang = 'el'; trApply(); S.settings.lang = l; save(); trApply(); if (Rec.inst) { Rec.stop(); Rec.sync(); } }
 /* ============ λίστα γλωσσών (ίδια με τις άλλες εφαρμογές) ============ */
 const LANGS = [
-  { code: 'el', name: 'Ελληνικά', rec: 'el-GR' }, { code: 'en', name: 'English', rec: 'en-US' }, { code: 'de', name: 'Deutsch', rec: 'de-DE' },
+  { code: 'en', name: 'English', rec: 'en-US' }, { code: 'el', name: 'Ελληνικά', rec: 'el-GR' }, { code: 'de', name: 'Deutsch', rec: 'de-DE' },
   { code: 'es', name: 'Español', rec: 'es-ES' }, { code: 'fr', name: 'Français', rec: 'fr-FR' }, { code: 'ru', name: 'Русский', rec: 'ru-RU' },
   { code: 'zh', name: '中文', rec: 'zh-CN' }, { code: 'hi', name: 'हिन्दी', rec: 'hi-IN' }, { code: 'bn', name: 'বাংলা', rec: 'bn-IN' },
   { code: 'ta', name: 'தமிழ்', rec: 'ta-IN' }, { code: 'te', name: 'తెలుగు', rec: 'te-IN' }, { code: 'mr', name: 'मराठी', rec: 'mr-IN' }
@@ -1098,8 +1148,8 @@ const UI = {
     document.body.dataset.view = v;
     $('#btn-back').hidden = (v === 'home' || v === 'run' || v === 'done');
     $('#btn-settings').hidden = (v === 'settings' || v === 'run');
-    $('#title').textContent = { home: 'Δίπλα σου', edit: 'Ακολουθία', settings: 'Ρυθμίσεις', done: 'Δίπλα σου', run: '' }[v];
-    if (v === 'home') { renderHome(); document.title = 'Δίπλα σου'; }
+    $('#title').textContent = { home: 'The Pi Helper', edit: 'Ακολουθία', settings: 'Ρυθμίσεις', done: 'The Pi Helper', run: '' }[v];
+    if (v === 'home') { renderHome(); document.title = 'The Pi Helper'; }
     if (v === 'settings') renderSettings();
     UI.refreshNote(); window.scrollTo(0, 0);
   },
@@ -1159,7 +1209,7 @@ const UI = {
     document.title = (over ? '+' : '') + fmtClock(over ? -rem : rem) + ' – ' + it.name;
   },
   renderDone(r) {
-    UI.show('done'); document.title = 'Δίπλα σου';
+    UI.show('done'); document.title = 'The Pi Helper';
     const tasks = r.items.filter(x => x.kind === 'task');
     const fm = m => m < 1 ? 'λιγότερο από 1′' : Math.round(m) + '′';
     let h = `<div class="big-msg">Τελείωσε η ακολουθία</div><p class="mute">Ολοκλήρωσες ${r.doneCount} από ${tasks.length}.</p><ul class="sum">`;
@@ -1176,10 +1226,16 @@ const UI = {
 const seqTotal = q => q.tasks.reduce((a, t) => a + t.minutes, 0) + (q.breakMin || 0) * Math.max(0, q.tasks.length - 1);
 window.__dpVoices = () => { if (!$('#view-home').hidden) renderHome(); };
 const voiceWarn = () => '';
+let tplOpen = false;
 function renderHome() {
+  const has = S.sequences.length;
+  $('#menu').innerHTML = (has ? '' : '<div class="hello"><b>Καλώς ήρθες</b>Διάλεξε πώς θέλεις να ξεκινήσεις. Όλα αλλάζουν όποτε θες.</div>') +
+    `<div class="tiles"><button class="tile main" data-menu="new"><span class="ic">＋</span><span><b>Νέα ακολουθία</b><small>Φτιάξε τη δική σου, από το μηδέν</small></span></button>
+    <button class="tile" data-menu="tpl" aria-expanded="${tplOpen}"><span class="ic">💡</span><span><b>Ξεκίνα από μια ιδέα</b><small>Έτοιμο σημείο εκκίνησης που προσαρμόζεις</small></span></button></div>` +
+    (tplOpen ? '<div class="tpls">' + TEMPLATES.map((t, i) => `<button class="tpl" data-tpl="${i}"><span>${t.icon}</span><b>${esc(t.name)}</b><small>${durPhrase(t.tasks.reduce((a, x) => a + x[1], 0))}</small></button>`).join('') + '</div>' : '');
   const el = $('#seq-list');
-  if (!S.sequences.length) { el.innerHTML = '<div class="empty"><b>Φτιάξε την πρώτη σου ακολουθία</b>Μια σειρά από εργασίες, με χρόνο για την καθεμία. Η εφαρμογή μετράει, ειδοποιεί και ρωτάει πώς πάει.</div>'; return; }
-  el.innerHTML = voiceWarn() + S.sequences.map(q => `<div class="seq" data-id="${q.id}"><h2>${esc(q.name || 'Χωρίς όνομα')}</h2>
+  if (!has) { el.innerHTML = voiceWarn(); return; }
+  el.innerHTML = voiceWarn() + '<div class="sec">Οι ακολουθίες μου</div>' + S.sequences.map(q => `<div class="seq" data-id="${q.id}"><h2>${esc(q.name || 'Χωρίς όνομα')}</h2>
     <div class="meta">${q.tasks.length} ${q.tasks.length === 1 ? 'εργασία' : 'εργασίες'}, ${durPhrase(seqTotal(q))}</div>
     <div class="tasks-line" data-nt>${q.tasks.slice(0, 4).map(t => esc(t.name || '—')).join(', ')}${q.tasks.length > 4 ? '…' : ''}</div>
     <div class="row"><button class="btn primary" data-act="run">Έναρξη</button><button class="btn ghost" data-act="edit">Επεξεργασία</button></div></div>`).join('');
@@ -1306,11 +1362,19 @@ function importData(file) {
 /* ---- συνδέσεις γεγονότων ---- */
 $('#btn-settings').onclick = () => UI.show('settings');
 $('#btn-back').onclick = () => { if (view === 'edit') leaveEdit(); else UI.show(prevView === 'edit' || prevView === 'settings' ? 'home' : prevView); };
-$('#btn-new').onclick = () => {
-  const q = { id: uid(), name: '', breakMin: 0, alerts: cloneAlerts(DEFAULT_ALERTS), tasks: [{ id: uid(), name: '', minutes: 10, type: 'general', typeManual: false, alerts: null }] };
+function newSeqFrom(tp) {
+  const L = x => S.settings.lang === 'el' ? x : trTo(x);
+  const q = tp ? { id: uid(), name: L(tp.name), breakMin: tp.breakMin || 0, alerts: cloneAlerts(DEFAULT_ALERTS), tasks: tp.tasks.map(([n, m]) => ({ id: uid(), name: L(n), minutes: m, type: detectType(n), typeManual: false, alerts: null })) }
+    : { id: uid(), name: '', breakMin: 0, alerts: cloneAlerts(DEFAULT_ALERTS), tasks: [{ id: uid(), name: '', minutes: 10, type: 'general', typeManual: false, alerts: null }] };
   S.sequences.push(q); save(); openEditor(q, true);
-  setTimeout(() => { const i = $('#e-name'); if (i) i.focus(); }, 30);
-};
+  if (!tp) setTimeout(() => { const i = $('#e-name'); if (i) i.focus(); }, 30);
+}
+$('#menu').addEventListener('click', e => {
+  const m = e.target.closest('[data-menu]'), t = e.target.closest('[data-tpl]');
+  if (t) { tplOpen = false; newSeqFrom(TEMPLATES[+t.dataset.tpl]); return; }
+  if (!m) return;
+  if (m.dataset.menu === 'new') newSeqFrom(null); else { tplOpen = !tplOpen; renderHome(); }
+});
 $('#seq-list').addEventListener('click', e => {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const q = S.sequences.find(x => x.id === b.closest('.seq').dataset.id); if (!q) return;
@@ -1425,6 +1489,7 @@ window.addEventListener('beforeunload', e => { if (R && !R.finished) { e.prevent
 
 /* ============ εκκίνηση ============ */
 window.__dp = { speak: (...a) => speak(...a), NATIVE, toEn, enMode, setLang, classify, detectType, get S() { return S; }, get R() { return R; }, EV, classify, classifyAlts, detectType, predict, parseMinutes, norm, tick, itemRemaining, setNow(fn) { nowFn = fn || (() => Date.now()); }, startRun, applyIntent, handleHeard, Rec, UI, finishCurrent, TYPES };
+(function(){ const sp = document.getElementById('splash'); if (!sp) return; if (navigator.webdriver) { sp.remove(); return; } const hide = () => { sp.classList.add('off'); setTimeout(() => sp.remove(), 700); }; sp.addEventListener('click', hide); setTimeout(hide, 2600); })();
 refreshAddLabels(); UI.show('home'); trStart(); UI.micState(); UI.refreshNote();
 })();
 </script>
