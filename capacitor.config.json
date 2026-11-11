@@ -1,6 +1,6 @@
 {
   "appId": "com.galliard.diplasou",
-  "appName": "Δίπλα σου",
+  "appName": "The Pi Helper",
   "webDir": "www",
   "android": { "backgroundColor": "#BCE3DA" }
 }
