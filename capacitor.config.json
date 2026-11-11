@@ -1,0 +1,6 @@
+{
+  "appId": "com.galliard.diplasou",
+  "appName": "Δίπλα σου",
+  "webDir": "www",
+  "android": { "backgroundColor": "#BCE3DA" }
+}

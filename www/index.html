@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#B8A9C9">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<title>Δίπλα σου</title>
+<style>
+:root{
+  --paper:#FDFBF7; --mint:#A8DADC; --mint-bg1:#D3EFEB; --mint-bg2:#BCE3DA;
+  --lav:#B8A9C9; --lav-s:#EEE9F4; --lav-d:#6F58A0; --cream:#FFF8E4;
+  --coral:#E76F51; --coral-d:#C4462B; --slate:#2D3142; --muted:#565B70; --ink2:#3F4358;
+  --gold:#E9C46A; --breath:#5FB5B8;
+  --lcd-bg:#08657B; --lcd-head:#003542; --lcd-hi:#FFBA00;
+  --state:var(--lcd-hi); --state-ui:var(--coral-d);
+  --tap:52px;
+  --px:'Press Start 2P',ui-monospace,Consolas,monospace;
+  font-family:'Manrope','Segoe UI Variable Display','Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:linear-gradient(180deg,#CDC2DC,var(--lav));background-attachment:fixed;color:var(--slate);min-height:100dvh;font-size:16px;line-height:1.45}
+.app{position:relative;max-width:520px;margin:0 auto;padding:0 10px calc(14px + env(safe-area-inset-bottom))}
+.topleds{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px}
+.led{display:flex;align-items:center;gap:8px;font-family:var(--px);font-size:7px;opacity:.85}
+.led i{width:10px;height:10px;border-radius:50%;background:var(--coral);border:2px solid var(--slate);box-shadow:0 0 6px var(--coral)}
+.spk{display:flex;gap:4px}.spk i{width:5px;height:5px;border-radius:50%;background:var(--slate);opacity:.45}
+.screen{position:relative;min-height:calc(100dvh - 34px - 14px);padding:14px 16px 30px;border-radius:26px;background:linear-gradient(180deg,var(--mint-bg1),var(--mint-bg2));box-shadow:0 0 0 3px var(--slate),inset 0 0 0 3px rgba(255,255,255,.45),inset 0 10px 24px rgba(45,49,66,.12)}
+@media(min-width:760px){.app{margin-top:12px;padding-bottom:10px;border-radius:40px;background:linear-gradient(180deg,#CDC2DC,var(--lav));box-shadow:0 30px 60px rgba(45,49,66,.35),0 0 0 3px var(--slate)}.screen{min-height:min(860px,calc(100dvh - 24px - 34px - 10px))}}
+h1,h2,h3,p{margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--lav-d);outline-offset:2px;border-radius:12px}
+
+/* header */
+.top{display:flex;align-items:center;gap:10px;min-height:48px;margin-bottom:10px}
+.top h1{flex:1;font-size:24px;font-weight:800;letter-spacing:-.01em}
+body[data-view=run] .top{display:none}
+
+/* controls */
+.btn{min-height:var(--tap);padding:0 20px;border-radius:999px;border:2px solid var(--slate);background:var(--paper);color:var(--slate);font-weight:800;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 0 var(--lav),inset 0 2px 0 rgba(255,255,255,.35);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--lav)}
+.btn.primary{background:var(--coral-d);color:#fff;box-shadow:0 4px 0 #7E2A18,inset 0 2px 0 rgba(255,255,255,.35)}
+.btn.primary:active{box-shadow:0 2px 0 #7E2A18}
+.btn.ok{background:var(--mint);box-shadow:0 4px 0 #5E9EA1,inset 0 2px 0 rgba(255,255,255,.35)}
+.btn.ok:active{box-shadow:0 2px 0 #5E9EA1}
+.btn.ghost{background:transparent;box-shadow:none}
+.btn.danger{color:var(--coral-d);background:var(--paper)}
+.btn.wide{width:100%}
+.btn.sm{min-height:42px;padding:0 14px;font-size:14px}
+.icon{width:46px;height:46px;min-height:46px;border-radius:14px;border:2px solid var(--slate);background:var(--paper);cursor:pointer;font-size:19px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:0 3px 0 var(--lav)}
+.icon:active{transform:translateY(2px);box-shadow:0 1px 0 var(--lav)}
+.icon.sm{width:38px;height:38px;min-height:38px;font-size:15px;border-radius:11px}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:2px solid var(--slate);background:var(--paper);cursor:pointer;font-size:14px;font-weight:700;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--slate);color:#fff}
+.seg{display:flex;flex-wrap:wrap;padding:4px;border:2px solid var(--slate);border-radius:22px;background:var(--paper);gap:2px}
+.seg button{flex:1 1 auto;min-height:40px;border:0;border-radius:999px;background:transparent;cursor:pointer;font-size:14px;font-weight:800;padding:0 10px;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--slate);color:#fff}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spacer{flex:1}
+.mute{color:var(--muted)}
+.small{font-size:13px}
+.note,.empty{border:2px dashed var(--slate);background:var(--cream);border-radius:16px;padding:12px 14px;margin:8px 0;color:var(--ink2);font-size:14px;line-height:1.5}
+.note.warn{border-color:var(--coral-d)}
+label.field{display:block;margin:16px 0 6px;font-weight:800;font-size:13px;color:var(--lav-d);letter-spacing:.04em}
+.field-hint{font-size:13px;color:var(--muted);font-weight:600;display:block;margin-top:2px}
+.text{width:100%;min-height:48px;border-radius:14px;border:2px solid var(--slate);background:var(--paper);padding:0 14px;font-size:16px}
+.text::placeholder{color:rgba(86,91,112,.6)}
+.cust{display:inline-flex;align-items:center;gap:6px}
+.cust input{width:72px;min-height:40px;text-align:center;border-radius:999px;border:2px dashed var(--slate);background:var(--paper);font-size:15px;font-weight:700;padding:0 6px;-moz-appearance:textfield}
+.cust input::-webkit-outer-spin-button,.cust input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.cust input::placeholder{color:rgba(86,91,112,.6);font-weight:600}
+.cust .u{font-size:13px;font-weight:800;color:var(--ink2)}
+
+/* home */
+.seq{background:var(--paper);border:2px solid var(--slate);border-radius:20px;box-shadow:0 4px 0 var(--lav);padding:16px;margin-bottom:14px}
+.seq h2{font-size:20px;font-weight:800;margin-bottom:2px}
+.seq .meta{color:var(--lav-d);font-weight:800;font-size:13px;margin-bottom:8px}
+.seq .tasks-line{color:var(--muted);font-size:14px;margin-bottom:12px}
+.empty b{display:block;color:var(--slate);font-size:18px;margin-bottom:4px}
+
+/* editor */
+.tasks{list-style:none;margin:14px 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.task{background:var(--paper);border:2px solid var(--slate);border-radius:20px;box-shadow:0 4px 0 var(--lav);padding:12px}
+.task-main{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center}
+.ix{width:30px;height:30px;border-radius:50%;background:var(--mint);border:2px solid var(--slate);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.task-line2{display:flex;gap:10px;align-items:center;margin:10px 0 0 0;flex-wrap:wrap}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper input{width:64px;min-height:42px;text-align:center;border-radius:12px;border:2px solid var(--slate);background:var(--paper);font-size:17px;font-weight:800}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stepper input{-moz-appearance:textfield}
+.type-sel{min-height:42px;border-radius:12px;border:2px solid var(--slate);background:var(--paper);padding:0 10px;font-size:14px;font-weight:700;max-width:100%}
+.task-tools{display:flex;gap:6px;margin:10px 0 0 0;align-items:center;flex-wrap:wrap}
+details.al{margin:10px 0 0 0}
+details.al>summary{cursor:pointer;color:var(--lav-d);font-weight:800;font-size:14px;min-height:36px;display:flex;align-items:center}
+.panel{border:2px solid var(--slate);background:var(--paper);border-radius:20px;box-shadow:0 4px 0 var(--lav);padding:4px 16px 16px;margin:14px 0}
+.panel h3{font-size:13px;font-weight:800;color:var(--lav-d);letter-spacing:.04em;margin:14px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.snd{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.snd button{min-height:44px;border-radius:999px;border:2px solid var(--slate);background:var(--paper);cursor:pointer;font-size:13px;font-weight:800}
+.snd button[aria-pressed=true]{background:var(--slate);color:#fff}
+
+/* run */
+.run-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.run-top .who{flex:1;min-width:0}
+.run-top .who b{display:block;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.run-top .who span{color:var(--lav-d);font-size:13px;font-weight:800}
+.segs{display:flex;gap:4px;margin:4px 0 6px}
+.segs i{flex:1;height:12px;border-radius:4px;border:2px solid var(--slate);background:var(--paper)}
+.segs i.done{background:var(--breath)}
+.segs i.skip{background:var(--lav)}
+.segs i.cur{background:var(--state-ui)}
+#view-run{--state:var(--lcd-hi);--state-ui:var(--coral-d)}
+#view-run[data-st=paused]{--state:#D8CCEA;--state-ui:var(--lav-d)}
+#view-run[data-st=over]{--state:#FF9C82;--state-ui:var(--coral-d)}
+.ring-wrap{position:relative;width:min(78vw,320px);aspect-ratio:1;margin:16px auto 12px;border-radius:50%;background:var(--lcd-bg);border:5px solid var(--lav);box-shadow:0 0 0 2px var(--slate),inset 0 0 28px rgba(0,0,0,.35)}
+.ring-wrap svg{width:100%;height:100%;display:block;overflow:visible;padding:8px}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.14);stroke-width:9}
+.ring-fg{fill:none;stroke:var(--state);stroke-width:9;stroke-linecap:round;stroke-dasharray:628.32;stroke-dashoffset:0;transform:rotate(-90deg);transform-origin:110px 110px;filter:drop-shadow(0 0 6px var(--state));transition:stroke .3s}
+.ring-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#run-time{font-family:var(--px);font-size:clamp(26px,9vw,38px);color:var(--state);font-variant-numeric:tabular-nums;line-height:1;text-shadow:0 0 10px rgba(255,186,0,.25)}
+#run-state{margin-top:12px;color:#ADD8E0;font-weight:800;font-size:14px}
+#run-task{text-align:center;font-size:clamp(22px,6vw,26px);font-weight:800;margin-top:8px;overflow-wrap:anywhere}
+#run-type{text-align:center;color:var(--lav-d);font-weight:800;margin-top:2px}
+#run-next{text-align:center;color:var(--muted);font-size:14px;margin-top:6px}
+.run-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.run-actions .btn{padding:0 8px}
+.run-actions .big{grid-column:1/-1;min-height:60px;font-size:19px}
+.mic-row{display:flex;align-items:center;gap:12px;margin-top:16px}
+.mic-row .heard{flex:1;color:var(--ink2);font-size:14px;min-height:22px}
+.mic-row .btn.listening{background:var(--coral-d);color:#fff}
+.hints{margin-top:14px;color:var(--ink2);font-size:13px;text-align:center}
+.checkin,.tipcard{border:2px solid var(--slate);background:var(--paper);border-radius:20px;box-shadow:0 4px 0 var(--lav);padding:14px;margin-top:16px;animation:pop .22s ease-out}
+.tipcard{background:var(--cream);border-style:dashed}
+.checkin p,.tipcard p{font-size:17px;font-weight:800;margin-bottom:12px}
+.ck-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ck-btns .btn{min-height:50px;font-size:15px;padding:0 10px}
+.ck-listen{display:flex;gap:8px;align-items:center;margin-top:10px;color:var(--ink2);font-size:13px;font-weight:700}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--coral);border:2px solid var(--slate);animation:pulse 1.1s infinite}
+@keyframes pop{from{transform:scale(.97);opacity:.4}to{transform:none;opacity:1}}
+@keyframes pulse{50%{opacity:.25}}
+
+/* done */
+.sum{list-style:none;padding:0;margin:14px 0;display:flex;flex-direction:column;gap:8px}
+.sum li{display:flex;gap:10px;align-items:baseline;background:var(--paper);border:2px solid var(--slate);border-radius:16px;padding:10px 14px}
+.sum li b{flex:1}
+.sum .tag{color:var(--lav-d);font-weight:800;font-size:14px;white-space:nowrap}
+.big-msg{font-size:24px;font-weight:800;margin:10px 0 4px}
+
+/* settings */
+.s-row{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 0;border-top:2px dashed rgba(45,49,66,.25)}
+.s-row:first-of-type{border-top:0}
+.s-row .l{flex:1;font-weight:800}
+.s-row .l small{display:block;color:var(--muted);font-weight:600;font-size:13px}
+input[type=range]{width:100%;accent-color:var(--coral-d);min-height:36px}
+.sw{position:relative;width:48px;height:28px;flex:none}
+.sw input{appearance:none;-webkit-appearance:none;width:48px;height:28px;margin:0;border-radius:999px;background:rgba(45,49,66,.25);border:2px solid var(--slate);cursor:pointer;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--paper);border:2px solid var(--slate);transition:transform .15s}
+.sw input:checked{background:var(--lcd-hi)}
+.sw input:checked::after{transform:translateX(20px)}
+
+/* modal / toast */
+.modal{position:fixed;inset:0;background:rgba(45,49,66,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal .box{background:var(--paper);border:2px solid var(--slate);border-radius:24px;box-shadow:0 5px 0 var(--lav);padding:20px;max-width:420px;width:100%}
+.modal p{font-size:18px;font-weight:800;margin-bottom:16px}
+.modal .row{justify-content:flex-end}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,30px);background:var(--slate);color:#fff;border-radius:999px;padding:10px 18px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:92vw;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:420px){.ck-btns{grid-template-columns:1fr}.snd{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body data-view="home">
+<div class="app">
+  <div class="topleds"><div class="led"><i></i>CULTEQ</div><div class="spk"><i></i><i></i><i></i></div></div>
+  <div class="screen">
+  <header class="top">
+    <button class="icon" id="btn-back" hidden aria-label="Πίσω">‹</button>
+    <h1 id="title">Δίπλα σου</h1>
+    <button class="icon" id="btn-settings" aria-label="Ρυθμίσεις">⚙</button>
+  </header>
+  <div id="support-note" class="note warn" hidden></div>
+  <main>
+    <section id="view-home" class="view">
+      <div id="seq-list"></div>
+      <button class="btn primary wide" id="btn-new">Νέα ακολουθία</button>
+    </section>
+
+    <section id="view-edit" class="view" hidden></section>
+
+    <section id="view-run" class="view" hidden data-st="running">
+      <div class="run-top">
+        <button class="icon" id="btn-stop" aria-label="Σταμάτημα ακολουθίας">✕</button>
+        <div class="who"><b id="run-seq"></b><span id="run-count"></span></div>
+      </div>
+      <div class="segs" id="run-segs"></div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 220 220" aria-hidden="true"><circle class="ring-bg" cx="110" cy="110" r="100"/><circle class="ring-fg" id="ring" cx="110" cy="110" r="100"/></svg>
+        <div class="ring-mid"><div id="run-time" role="timer" aria-live="off">0:00</div><div id="run-state">σε εξέλιξη</div></div>
+      </div>
+      <h2 id="run-task"></h2>
+      <div id="run-type"></div>
+      <div id="run-next"></div>
+
+      <div class="checkin" id="checkin" hidden>
+        <p id="ck-q"></p>
+        <div class="ck-btns">
+          <button class="btn" data-ans="done">✓ Τελείωσα</button>
+          <button class="btn" data-ans="good">Πάω καλά</button>
+          <button class="btn" data-ans="more">Θέλω λίγο ακόμα</button>
+          <button class="btn" data-ans="stuck">Κόλλησα</button>
+          <button class="btn" data-ans="pause">Διακοπή</button>
+        </div>
+        <div class="ck-listen" id="ck-listen" hidden><span class="dot"></span><span>Ακούω την απάντησή σου…</span></div>
+      </div>
+      <div class="tipcard" id="tipcard" hidden>
+        <p id="tip-text"></p>
+        <div class="ck-btns">
+          <button class="btn" data-ans="more">+5 λεπτά</button>
+          <button class="btn" data-ans="skip">Παράλειψη</button>
+          <button class="btn primary" data-ans="tipok">Εντάξει, δοκιμάζω</button>
+        </div>
+      </div>
+
+      <div class="run-actions">
+        <button class="btn ok big" id="b-done">✓ Τελείωσα</button>
+        <button class="btn" id="b-pause">Παύση</button>
+        <button class="btn" id="b-more">+5 λεπτά</button>
+        <button class="btn" id="b-skip">Παράλειψη</button>
+      </div>
+      <div class="mic-row">
+        <button class="btn sm" id="b-mic">🎤 Μίλα</button>
+        <div class="heard" id="heard" aria-live="polite"></div>
+      </div>
+      <div class="hints" id="hints">Πες: «παύση», «συνέχεια», «τελείωσα», «πρόσθεσε πέντε λεπτά», «πόσο έμεινε»</div>
+    </section>
+
+    <section id="view-done" class="view" hidden></section>
+    <section id="view-settings" class="view" hidden></section>
+  </main>
+  </div>
+</div>
+<div class="modal" id="modal" hidden><div class="box"><p id="modal-text"></p><div class="row"><button class="btn ghost" id="modal-no">Άκυρο</button><button class="btn primary" id="modal-yes">Ναι</button></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+'use strict';
+/* ============ βοηθητικά ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+let nowFn = () => Date.now();
+const now = () => nowFn();
+const lastPick = {};
+const pick = (arr, k) => { if (!Array.isArray(arr)) return arr; let i = Math.floor(Math.random() * arr.length); if (arr.length > 1 && k) { if (i === lastPick[k]) i = (i + 1) % arr.length; lastPick[k] = i; } return arr[i]; };
+
+/* κανονικοποίηση ελληνικού κειμένου: πεζά, χωρίς τόνους, ς→σ */
+function norm(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/ς/g, 'σ').replace(/[^\p{L}\p{N}\p{M}\s+]/gu, ' ').replace(/\s+/g, ' ').trim();
+}
+const L = a => a.map(norm);
+const CJK = /[぀-鿿]/;
+const has = (t, list) => list.some(s => CJK.test(s) ? t.includes(s) : (' ' + t).includes(' ' + s));          // αρχή λέξης/θέματος
+const hasW = (t, list) => list.some(s => CJK.test(s) ? t.includes(s) : (' ' + t + ' ').includes(' ' + s + ' '));
+const YES_X = [], NO_X = []; // ολόκληρη λέξη
+
+/* ============ ρυθμίσεις και δεδομένα ============ */
+const STORE_KEY = 'diplasou.v1';
+const DEFAULT_ALERTS = { mode: 'both', marks: ['start', 'r5', 'r1', 'end'], checkin: 10 };
+const MARKS = [['start', 'Έναρξη'], ['half', 'Στη μέση'], ['r10', '10′ πριν'], ['r5', '5′ πριν'], ['r2', '2′ πριν'], ['r1', '1′ πριν'], ['end', 'Λήξη']];
+const CHECKINS = [[0, 'Όχι'], [5, 'Κάθε 5′'], [10, 'Κάθε 10′'], [15, 'Κάθε 15′'], [20, 'Κάθε 20′']];
+const SOUNDS = [['soft', 'Απαλός'], ['bell', 'Καμπάνα'], ['arcade', 'Arcade'], ['water', 'Νερό']];
+const DEFAULT_SETTINGS = { sound: 'soft', volume: 0.8, rate: 1, voiceURI: '', listen: false, vibrate: true, notify: false, endBehavior: 'ask', wake: true, addMin: 5, lang: 'el', musicListen: 'pause' };
+const cloneAlerts = a => ({ mode: a.mode, marks: [...a.marks], checkin: a.checkin });
+
+/* ============ τύποι εργασιών και πρόβλεψη (χωρίς AI) ============ */
+const TYPES = {
+  home:     { l: 'Σπίτι',         i: '🏠', d: 20, tip: 'Διάλεξε ένα μόνο αντικείμενο και ξεκίνα από αυτό. Μόνο για δύο λεπτά.',
+              k: ['dish', 'laundry', 'clean', 'tidy', 'vacuum', 'sweep', 'mop', 'iron', 'bed', 'trash', 'garbage', 'kitchen', 'dust', 'housework', 'chores', 'wash', 'πιατ', 'πλυντηρ', 'ρουχ', 'σιδερ', 'σκουπ', 'σφουγγαρ', 'καθαρ', 'συγυρ', 'σπιτι', 'κουζιν', 'σκονη', 'ξεσκον', 'κρεβατ', 'πλυσι', 'στεγνωτ', 'απλωσ', 'μαζεψ', 'ανακυκλωσ', 'σκουπιδ'] },
+  cook:     { l: 'Μαγείρεμα',     i: '🍳', d: 30, tip: 'Βγάλε στον πάγκο μόνο τα υλικά του πρώτου βήματος.',
+              k: ['cook', 'meal', 'dinner', 'lunch', 'salad', 'bake', 'oven', 'soup', 'μαγειρ', 'φαγητ', 'γευμα', 'σαλατ', 'ζυμ', 'ψησ', 'φουρν', 'μεσημεριαν', 'βραδινο', 'σουπα', 'τηγαν', 'κοψιμο'] },
+  admin:    { l: 'Διοικητικά',    i: '✉️', d: 20, tip: 'Άνοιξε το πρώτο πράγμα και γράψε μόνο μία γραμμή.',
+              k: ['email', 'bill', 'tax', 'invoice', 'form', 'paperwork', 'bank', 'payment', 'application', 'admin', 'order', 'email', 'mail', 'μειλ', 'γραμματ', 'λογαριασμ', 'φορολογ', 'τιμολογ', 'φακελ', 'εγγραφ', 'αιτηση', 'πληρωμ', 'τραπεζ', 'αδεια', 'δηλωση', 'εφορι', 'λογιστ', 'χαρτι', 'γραφειοκρατ', 'παραγγελ'] },
+  creative: { l: 'Δημιουργία',    i: '🎨', d: 30, tip: 'Γράψε ή παίξε κάτι «κακό» επίτηδες, μόνο για να ξεκινήσεις.',
+              k: ['write', 'writing', 'compose', 'music', 'guitar', 'paint', 'draw', 'design', 'book', 'article', 'idea', 'song', 'record', 'video', 'create', 'γραψιμο', 'γραφω', 'συνθεσ', 'συνθετ', 'μουσικ', 'κιθαρ', 'σχεδι', 'ζωγραφ', 'βιβλι', 'κειμεν', 'αρθρο', 'ιδεα', 'δημιουργ', 'στιχ', 'εκτελεσ', 'πρακτικ', 'ηχογραφ', 'βιντεο'] },
+  study:    { l: 'Μελέτη',        i: '📚', d: 25, tip: 'Διάβασε μόνο την πρώτη παράγραφο.',
+              k: ['study', 'read', 'homework', 'lesson', 'exam', 'notes', 'research', 'course', 'learn', 'διαβασ', 'διαβαζ', 'μελετ', 'μαθημα', 'εξετασ', 'σημειωσ', 'ανασκοπ', 'σεμιναρ', 'ερευν', 'εκπαιδ', 'μαθε'] },
+  move:     { l: 'Κίνηση',        i: '🧘', d: 20, tip: 'Κάνε μόνο την πρώτη κίνηση. Μετά βλέπουμε.',
+              k: ['workout', 'exercise', 'stretch', 'walk', 'run', 'gym', 'bike', 'dance', 'meditat', 'γυμναστ', 'γιογκα', 'yoga', 'διατασ', 'βολτα', 'περπατ', 'τρεξ', 'ασανα', 'ασκησ', 'workout', 'προπονησ', 'χορο', 'ποδηλατ', 'διαλογισμ'] },
+  selfcare: { l: 'Φροντίδα',      i: '🛁', d: 10, tip: 'Κάνε μόνο το πρώτο βήμα, τίποτα άλλο.',
+              k: ['shower', 'teeth', 'vitamin', 'routine', 'makeup', 'hair', 'shave', 'dress', 'bath', 'skincare', 'ντους', 'δοντι', 'βιταμιν', 'ρουτινα', 'μακιγι', 'μαλλι', 'νυχι', 'ξυρισμ', 'περιποιησ', 'ντυσιμο', 'ντυθ', 'μπανιο', 'πρωινο', 'κρεμα'] },
+  calls:    { l: 'Επικοινωνία',   i: '📞', d: 10, tip: 'Γράψε τρεις λέξεις για το τι θα πεις και πάρε τηλέφωνο.',
+              k: ['call', 'phone', 'meeting', 'message', 'reply', 'text', 'τηλεφων', 'καλεσ', 'κληση', 'ζουμ', 'zoom', 'συσκεψη', 'συναντηση', 'μηνυμ', 'απαντησ', 'παρε τηλ', 'τηλεφωνημ'] },
+  errands:  { l: 'Δουλειές έξω',  i: '🛍️', d: 30, tip: 'Βάλε παπούτσια και πάρε τα κλειδιά. Μόνο αυτό.',
+              k: ['shop', 'groceries', 'supermarket', 'pharmacy', 'post office', 'pick up', 'fuel', 'errand', 'ψωνι', 'σουπερ', 'μαρκετ', 'φαρμακει', 'ταχυδρομ', 'παραλαβ', 'αγορ', 'βενζιν', 'εξοδ', 'δρομο', 'τραπεζα'] },
+  organize: { l: 'Οργάνωση',      i: '🗂️', d: 15, tip: 'Διάλεξε ένα συρτάρι ή ένα σημείο και ξεκίνα από εκεί.',
+              k: ['organi', 'sort', 'drawer', 'wardrobe', 'closet', 'storage', 'shelf', 'file', 'declutter', 'pack', 'οργαν', 'ταξινομ', 'συρταρ', 'ντουλαπ', 'αποθηκ', 'βιβλιοθηκ', 'αρχειο', 'αρχειοθετ', 'ετοιμασια βαλιτσ', 'βαλιτσ', 'ξεκαθαρ'] },
+  general:  { l: 'Γενική',        i: '⭐', d: 15, tip: 'Κάνε το πιο μικρό βήμα που σκέφτεσαι, για δύο λεπτά.', k: [] },
+  break:    { l: 'Διάλειμμα',     i: '☕', d: 2,  tip: '', k: [] }
+};
+Object.values(TYPES).forEach(t => { t.k = L(t.k); });
+const TYPE_ORDER = ['home', 'cook', 'admin', 'creative', 'study', 'move', 'selfcare', 'calls', 'errands', 'organize', 'general'];
+
+function detectType(name) {
+  const t = ' ' + norm(name);
+  if (t.trim() === '') return 'general';
+  let best = 'general', bs = 0;
+  for (const k of TYPE_ORDER) {
+    let s = 0; TYPES[k].k.forEach(st => { if (t.includes(' ' + st)) s++; });
+    if (s > bs) { bs = s; best = k; }
+  }
+  return best;
+}
+const median = a => { const b = [...a].sort((x, y) => x - y), n = b.length; return n % 2 ? b[(n - 1) / 2] : (b[n / 2 - 1] + b[n / 2]) / 2; };
+const roundMin = m => m >= 10 ? Math.max(5, Math.round(m / 5) * 5) : Math.max(1, Math.round(m));
+function predict(name, type) {
+  const key = norm(name), H = S.history || [];
+  const byName = key ? H.filter(h => h.key === key).slice(-5) : [];
+  if (byName.length) return { m: roundMin(median(byName.map(h => h.actual))), src: 'name', n: byName.length };
+  const byType = H.filter(h => h.type === type).slice(-8);
+  if (byType.length >= 3) return { m: roundMin(median(byType.map(h => h.actual))), src: 'type', n: byType.length };
+  return { m: TYPES[type].d, src: 'default', n: 0 };
+}
+
+/* ============ αναγνώριση εντολών και απαντήσεων (χωρίς AI) ============ */
+const U = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ενα: 1, μια: 1, ενας: 1, δυο: 2, τρια: 3, τρεις: 3, τεσσερα: 4, τεσσερις: 4, πεντε: 5, εξι: 6, επτα: 7, εφτα: 7, οκτω: 8, οχτω: 8, εννεα: 9, εννια: 9 };
+const TN = { ten: 10, fifteen: 15, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, δεκα: 10, δεκαπεντε: 15, εικοσι: 20, τριαντα: 30, σαραντα: 40, πενηντα: 50, εξηντα: 60 };
+function parseMinutes(t) {
+  if (/μιση ωρα|μισαωρο|half an hour|half hour/.test(t)) return 30;
+  if (/quarter/.test(t)) return 15;
+  if (/(^| )an hour/.test(t)) return 60;
+  if (/τεταρτο/.test(t)) return 15;
+  const d = t.match(/(\d{1,3})/); if (d) return clamp(+d[1], 1, 60);
+  const toks = t.split(' '); let total = 0, found = false;
+  for (let i = 0; i < toks.length; i++) {
+    const w = toks[i];
+    if (TN[w] !== undefined) { total = TN[w]; found = true; const nx = toks[i + 1]; if (nx && U[nx] !== undefined && total % 10 === 0 && total < 60) { total += U[nx]; i++; } break; }
+    if (U[w] !== undefined) { total = U[w]; found = true; break; }
+  }
+  if (!found) return null;
+  if (/(^| )(ωρα|ωρες|hours?)/.test(t) && total <= 2) total *= 60;
+  return clamp(total, 1, 60);
+}
+const P = {
+  stopall: L(['σταματα τα παντα', 'σταματα ολα', 'σταματησε ολα', 'τελος ακολουθιας', 'ακυρωση', 'ακυρωσε', 'τερμα την ακολουθια', 'φτανει για σημερα']),
+  stuck: L(['κολλησα', 'δεν ξερω', 'δυσκολευομαι', 'δεν μπορω', 'δεν ξεκιν', 'βαριεμαι', 'βαρεθηκα', 'δεν εχω ορεξη', 'χαθηκα', 'μπερδευτηκα', 'δυσκολο', 'βοηθεια', 'βοηθησε', 'αγχωθηκα', 'αγχωνομαι', 'δεν αντεχω', 'παγωσα']),
+  mid: L(['ετσι κι ετσι', 'ετσι και ετσι', 'μετρια', 'σιγα σιγα', 'ουτε καλα ουτε κακα']),
+  remaining: L(['ποσο εμεινε', 'ποσο μενει', 'ποσος χρονος', 'ποσα λεπτα', 'ποση ωρα', 'ποσο ακομα', 'ποσο απομενει', 'ποσο χρονο εχω', 'τι χρονο εχω']),
+  skip: L(['παραληψη', 'παραλειψε', 'προσπερασε', 'ασε το', 'αστο', 'προσπερνα']),
+  restart: L(['απο την αρχη', 'ξαναρχισε', 'ξεκινα ξανα', 'επανεκκινηση']),
+  resume: L(['συνεχισε', 'συνεχεια', 'συνεχιζουμε', 'γυρισα', 'επεστρεψα', 'ξεκινα', 'παμε', 'ετοιμ']),
+  pause: L(['παυση', 'σταματα', 'σταματησε', 'στασου', 'περιμενε', 'περιμενετε', 'μισο λεπτο', 'μια στιγμη', 'στιγμη', 'διακοπη', 'χτυπαει', 'με ζητανε', 'με φωναζουν', 'εκτακτο']),
+  brk: L(['διαλειμμα', 'ξεκουραση', 'κουραστηκα', 'κουραζομαι', 'θελω να ξεκουραστω']),
+  next: L(['επομενο', 'παμε στο επομενο']),
+  done: L(['τελειωσα', 'τελειωσε', 'ολοκληρωσα', 'εγινε', 'το εκανα', 'τελος', 'ετοιμ']),
+  good: L(['καλα', 'μια χαρα', 'ωραια', 'προχωραει', 'παει καλα', 'πανε καλα', 'παω καλα', 'ολα καλα', 'ευκολα', 'κανονικα', 'ενταξει', 'οκ', 'ok'])
+};
+const EN_P = {
+  stopall: ['stop everything', 'stop all', 'cancel everything', 'end sequence', 'end the sequence', 'stop the sequence', 'that s enough for today', 'quit'],
+  stuck: ['i m stuck', 'i am stuck', 'stuck', 'i don t know', 'i can t', 'can t start', 'struggling', 'this is hard', 'too hard', 'help', 'overwhelmed', 'bored', 'i m lost', 'confused', 'don t feel like'],
+  mid: ['so so', 'not bad', 'slowly', 'kind of', 'sort of', 'meh', 'okay ish'],
+  remaining: ['how much time', 'how much is left', 'how much left', 'time left', 'how long', 'how many minutes', 'time remaining', 'what s left'],
+  skip: ['skip', 'leave it', 'pass on'],
+  restart: ['start over', 'restart', 'from the beginning', 'begin again'],
+  resume: ['resume', 'continue', 'i m back', 'i am back', 'go on', 'carry on', 'let s go', 'ready'],
+  pause: ['pause', 'wait', 'hold on', 'hold up', 'one moment', 'one sec', 'just a sec', 'just a minute', 'give me a minute', 'stop', 'interrupt', 'phone', 'someone s calling', 'urgent'],
+  brk: ['break', 'rest', 'i m tired', 'tired', 'need a rest', 'take a break'],
+  next: ['next', 'go to the next'],
+  done: ['done', 'finished', 'i finished', 'completed', 'all done', 'finish', 'that s it'],
+  good: ['good', 'fine', 'great', 'going well', 'all good', 'easy', 'okay', 'ok', 'alright']
+};
+Object.keys(EN_P).forEach(k => P[k].push(...L(EN_P[k])));
+const MORE_RE = [/(^| )(προσθεσε|παραταση)/, /\+ ?\d/, /(^| )(θελω|χρειαζομαι) ((λιγο|περισσοτερο|περισσοτερη|ακομα|αλλο) )*(χρονο|ακομα|λεπτα|ωρα)/,
+  /(^| )(αλλα|ακομα|βαλε) (\d+|[α-ω]+) (λεπτα|λεπτο)/, /(^| )(αλλα|ακομα|βαλε) \d+/, /λιγο ακομα/, /δεν προλαβ/, /(^| )αργω/, /περισσοτερο χρονο/, /δεν (εχω )?τελειωσ/,
+  /(^| )(add|extend|extension)/, /(^| )(i )?(need|want) (a )?((little|bit|some|more|extra|another) )*(time|minutes|mins?)/, /(^| )(another|more|give me|add|put) (\d+|[a-z]+) (minutes?|mins?)/, /a (little|bit) more/, /(^| )more time/, /running (late|behind)/, /(not|n t) (finished|done)/];
+const NEG_GOOD = /(^| )(οχι|δεν) ((παει|πανε|παω|παιζει) )?καλα|(^| )(not|no) (going )?(well|good|great)|(^| )(it s |i m )?not (so )?(good|well)/;
+const CONT_OK = new Set(['pause', 'resume', 'done', 'skip', 'more', 'remaining', 'stopall', 'restart', 'break']);
+
+function classify(raw, ctx = {}) {
+  const t = norm(raw); if (!t) return null;
+  if (ctx.confirm) {
+    if (hasW(t, ['ναι', 'οκ', 'ok', 'ενταξει', 'σωστα', 'βεβαια', 'σταματα', 'yes', 'yeah', 'yep', 'sure', 'okay', 'right', 'stop', ...YES_X])) return { intent: 'yes' };
+    if (has(t, ['οχι', 'μην', 'no', 'don t', 'not', ...NO_X])) return { intent: 'no' };
+    return null;
+  }
+  if (!ctx.window && t.split(' ').length > 6) return null;
+  let r = null;
+  const mins = () => parseMinutes(t);
+  if (has(t, P.stopall)) r = { intent: 'stopall' };
+  else if (MORE_RE.some(re => re.test(t))) r = { intent: 'more', minutes: mins() || 0 };
+  else if (NEG_GOOD.test(t) || has(t, P.mid)) r = { intent: 'mid' };
+  else if (has(t, P.stuck)) r = { intent: 'stuck' };
+  else if (has(t, P.remaining)) r = { intent: 'remaining' };
+  else if (has(t, P.skip)) r = { intent: 'skip' };
+  else if (has(t, P.restart)) r = { intent: 'restart' };
+  else if (has(t, P.next)) r = { intent: 'done' };
+  else if (ctx.paused && has(t, P.resume)) r = { intent: 'resume' };
+  else if (has(t, P.pause)) r = { intent: 'pause' };
+  else if (has(t, P.brk)) r = { intent: 'break' };
+  else if (has(t, P.done)) r = { intent: 'done' };
+  else if (has(t, P.good)) r = { intent: 'good' };
+  if (r && !ctx.window && !CONT_OK.has(r.intent)) return null;
+  return r;
+}
+function classifyAlts(alts, ctx) { for (const a of alts) { const r = classify(a, ctx); if (r) return Object.assign({ text: a }, r); } return null; }
+
+/* ============ αποθήκευση ============ */
+let S;
+function seedData() {
+  const mk = (name, tasks, extra = {}) => Object.assign({ id: uid(), name, breakMin: 0, alerts: cloneAlerts(DEFAULT_ALERTS), tasks: tasks.map(([n, m]) => ({ id: uid(), name: n, minutes: m, type: detectType(n), alerts: null })) }, extra);
+  return {
+    v: 1, settings: Object.assign({}, DEFAULT_SETTINGS), history: [],
+    sequences: [
+      mk('Συγύρισμα κουζίνας', [['Μάζεμα πιάτων και ποτηριών', 5], ['Πλύσιμο πιάτων', 15], ['Καθάρισμα πάγκου', 5], ['Σκουπίδια', 3]]),
+      mk('Διοικητικά του πρωινού', [['Απάντηση σε email', 15], ['Λογαριασμοί', 15], ['Τηλεφωνήματα', 10]], { breakMin: 2 })
+    ]
+  };
+}
+function normalizeState(r) {
+  r.settings = Object.assign({}, DEFAULT_SETTINGS, r.settings || {});
+  r.history = Array.isArray(r.history) ? r.history.slice(-300) : [];
+  r.sequences = (r.sequences || []).map(q => ({
+    id: q.id || uid(), name: q.name || '', breakMin: q.breakMin || 0,
+    alerts: Object.assign(cloneAlerts(DEFAULT_ALERTS), q.alerts || {}),
+    tasks: (q.tasks || []).map(t => ({ id: t.id || uid(), name: t.name || '', minutes: clamp(+t.minutes || 10, 1, 240), type: TYPES[t.type] ? t.type : 'general', typeManual: !!t.typeManual, alerts: t.alerts ? Object.assign(cloneAlerts(DEFAULT_ALERTS), t.alerts) : null }))
+  }));
+  return r;
+}
+function load() { try { const r = JSON.parse(localStorage.getItem(STORE_KEY)); if (r && Array.isArray(r.sequences)) return normalizeState(r); } catch (e) { } return normalizeState(seedData()); }
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { } }
+S = load();
+
+/* ============ ήχοι (WebAudio, χωρίς αρχεία) ============ */
+let AC = null, master = null;
+function audioCtx() {
+  try {
+    if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; AC = new C(); master = AC.createGain(); master.connect(AC.destination); }
+    if (AC.state === 'suspended') AC.resume();
+    master.gain.value = clamp(S.settings.volume, 0, 1);
+    return AC;
+  } catch (e) { return null; }
+}
+function osc(f, t0, d, o = {}) {
+  const c = AC, g = o.g == null ? 0.4 : o.g, x = c.createOscillator(), a = c.createGain();
+  x.type = o.type || 'sine'; x.frequency.setValueAtTime(f, t0);
+  if (o.glide) x.frequency.exponentialRampToValueAtTime(f * o.glide, t0 + d);
+  a.gain.setValueAtTime(0.0001, t0); a.gain.exponentialRampToValueAtTime(g, t0 + (o.attack || 0.01)); a.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+  x.connect(a); a.connect(master); x.start(t0); x.stop(t0 + d + 0.05);
+}
+const NT = { G4: 392, A4: 440, C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, C4: 261.63, E4: 329.63 };
+/* κάθε μοτίβο: [συχνότητα, καθυστέρηση, διάρκεια, τύπος, ένταση, γλίστρημα] */
+const PAT = {
+  soft: {
+    start: [[NT.C5, 0, .9, 'sine', .35], [NT.E5, .14, .9, 'sine', .3]],
+    warn: [[NT.G4, 0, 1.1, 'sine', .4]],
+    end: [[NT.E5, 0, 1, 'sine', .35], [NT.C5, .22, 1, 'sine', .35], [NT.G4, .44, 1.5, 'sine', .4]],
+    ask: [[NT.E5, 0, .7, 'sine', .3], [NT.C5, .2, .9, 'sine', .3]]
+  },
+  bell: {
+    start: [[NT.C5, 0, 1.8, 'bell', .35]],
+    warn: [[NT.G4, 0, 1.8, 'bell', .4]],
+    end: [[NT.C5, 0, 1.8, 'bell', .35], [NT.C5, .7, 1.8, 'bell', .35], [NT.C5, 1.4, 2.2, 'bell', .4]],
+    ask: [[NT.E5, 0, 1.4, 'bell', .3], [NT.A4, .35, 1.6, 'bell', .3]]
+  },
+  arcade: {
+    start: [[NT.C5, 0, .09, 'square', .12], [NT.E5, .08, .09, 'square', .12], [NT.G5, .16, .09, 'square', .12], [NT.C6, .24, .2, 'square', .12]],
+    warn: [[NT.A5, 0, .08, 'square', .12], [NT.A5, .14, .08, 'square', .12]],
+    end: [[NT.G4, 0, .14, 'square', .12], [NT.C5, .14, .14, 'square', .12], [NT.E5, .28, .14, 'square', .12], [NT.G5, .42, .4, 'square', .12]],
+    ask: [[NT.B5, 0, .07, 'square', .1], [NT.E6, .07, .3, 'square', .1]]
+  },
+  water: {
+    start: [[392, 0, .28, 'sine', .45, 1.7]],
+    warn: [[520, 0, .22, 'sine', .45, 1.5]],
+    end: [[392, 0, .28, 'sine', .45, 1.7], [440, .3, .28, 'sine', .45, 1.7], [523, .6, .4, 'sine', .45, 1.7]],
+    ask: [[600, 0, .2, 'sine', .4, 1.4], [450, .22, .26, 'sine', .4, 1.4]]
+  }
+};
+function playSound(kind, style) {
+  const c = audioCtx(); if (!c) return;
+  const pat = PAT[style || S.settings.sound] || PAT.soft, seq = pat[kind] || pat.warn, t = c.currentTime + 0.03;
+  seq.forEach(([f, dt, d, type, g, gl]) => {
+    if (type === 'bell') { osc(f, t + dt, d, { g }); osc(f * 2.76, t + dt, d * .7, { g: g * .35 }); osc(f * 5.4, t + dt, d * .4, { g: g * .15 }); }
+    else osc(f, t + dt, d, { type, g, glide: gl || 0 });
+  });
+  if (style === undefined && S.settings.vibrate && navigator.vibrate) { try { navigator.vibrate(kind === 'end' ? [200, 100, 200] : [120]); } catch (e) { } }
+}
+
+/* ============ φωνή (σύνθεση ομιλίας της συσκευής) ============ */
+const hasTTS = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+let voices = [];
+function refreshVoices() { if (hasTTS) { try { voices = speechSynthesis.getVoices() || []; } catch (e) { voices = []; } } }
+if (hasTTS) { refreshVoices(); try { speechSynthesis.onvoiceschanged = () => { refreshVoices(); if (window.__dpVoices) window.__dpVoices(); }; } catch (e) { } }
+const englishVoices = () => voices.filter(v => /^en/i.test(v.lang));
+function pickVoice() {
+  if (S.settings.voiceURI) { const v = voices.find(v => v.voiceURI === S.settings.voiceURI); if (v) return v; }
+  const g = englishVoices();
+  return g.find(v => /natural|online|neural/i.test(v.name) && /^en[-_](US|GB)/i.test(v.lang)) || g.find(v => /^en[-_]US/i.test(v.lang)) || g[0] || null;
+}
+/* Χωρίς ελληνική φωνή η συσκευή «συλλαβίζει» τα ελληνικά. Τότε μιλάω αγγλικά (η αναγνώριση της ομιλίας μένει ελληνική). */
+const enMode = () => hasTTS;
+const EN_TYPE = { home: 'housework', cook: 'cooking', admin: 'admin work', creative: 'creative work', study: 'study time', move: 'movement', selfcare: 'self care', calls: 'calls', errands: 'errands', organize: 'organizing', general: 'this task', break: 'break' };
+const EN_RULES = [
+  [/^Γεια σου! Είμαι εδώ, δίπλα σου\.$/, "Hi! I'm right here beside you."],
+  [/^Πώς πάει; Η εργασία είναι: (.+)\.$/, 'How is it going? The task is: $1.'],
+  [/^Έλα, πώς τα πας με αυτό: (.+);$/, 'Hey, how is it going with: $1?'],
+  [/^Μια ματιά στην πρόοδο: (.+)\. Πώς πάει;$/, 'Quick progress check: $1. How is it going?'],
+  [/^Πώς είναι τα πράγματα με: (.+);$/, 'How are things with: $1?'],
+  [/^Ξεκινάμε: (.+)\. (.+)\.$/, 'Starting: $1. $2.'],
+  [/^Διάλειμμα\. (.+)\.$/, 'Break time. $1.'],
+  [/^Επόμενο: (.+)\.$/, 'Next: $1.'],
+  [/^Απομένου?ν? (.+?)\.?$/, '$1 left.'],
+  [/^Απομένει (.+?)\.?$/, '$1 left.'],
+  [/^Ο χρόνος τελείωσε\. Τελείωσες ή θες λίγο ακόμα;$/, "Time's up. Are you done, or do you need a little more?"],
+  [/^Ο χρόνος τελείωσε\.?$/, "Time's up."],
+  [/^Ακόμα εδώ;.*$/, 'Still here? Tap done, or add some time.'],
+  [/^Τέλος διαλείμματος\.$/, 'Break is over.'],
+  [/^Παύση\..*$/, "Paused. I'm here when you're back."],
+  [/^Εντάξει, πάρε διάλειμμα\..*$/, "Okay, take a break. I'm here when you're back."],
+  [/^Είμαι εδώ όταν γυρίσεις\..*$/, "I'm here when you're back."],
+  [/^Εντάξει, πρόσθεσα (.+)\.$/, 'Okay, added $1.'],
+  [/^Από την αρχή\.$/, 'From the start.'],
+  [/^Κανένα πρόβλημα, συμβαίνει\..*$/, 'No problem, it happens. Try the tip on the screen.'],
+  [/^Τελείωσε η ακολουθία\. Ολοκλήρωσες (\d+) από (\d+) .*$/, 'Sequence finished. You completed $1 of $2 tasks. Well done!'],
+  [/^Να σταματήσω όλη την ακολουθία;.*$/, 'Stop the whole sequence? Answer on the screen.'],
+  [/^Μπράβο!$/, 'Well done!'], [/^Τέλεια!$/, 'Great!'], [/^Έγινε! Ωραία δουλειά\.$/, 'Done! Nice work.'], [/^Έτσι μπράβο!$/, "That's it!"], [/^Ένα λιγότερο!$/, 'One less!'],
+  [/^Τέλεια, συνέχισε έτσι\.$/, 'Great, keep going.'], [/^Ωραία, πάμε\.$/, "Nice, let's go."], [/^Μια χαρά! Συνεχίζουμε\.$/, 'Good! Carrying on.'],
+  [/^Εντάξει, σιγά σιγά\..*$/, 'Okay, one step at a time. You can add more time if you need it.'],
+  [/^Εντάξει, το προσπερνάμε\.$/, 'Okay, skipping this one.'],
+  [/^Δεν κατάλαβα\.$/, "Sorry, I didn't get that."]
+];
+function toEn(text) {
+  let t = text;
+  if (typeof R !== 'undefined' && R) R.items.forEach(it => { if (it.name && it.kind === 'task') t = t.split(it.name).join(EN_TYPE[it.type] || 'this task'); });
+  let m = /^Είμαστε στη μέση\. (.+)$/.exec(t); if (m) return "We're halfway. " + toEn(m[1]);
+  m = /^(.+)\. Συνεχίζουμε\.$/.exec(t); if (m) return toEn(m[1] + '.') + ' Back to it.';
+  for (const [re, rep] of EN_RULES) if (re.test(t)) { t = t.replace(re, rep); break; }
+  return t.replace(/(\d+) δευτερόλεπτα/g, '$1 seconds').replace(/(\d+) λεπτά/g, '$1 minutes').replace(/1 λεπτό/g, '1 minute').replace(/1 ώρα/g, '1 hour').replace(/(\d+) ώρες/g, '$1 hours').replace(/ και /g, ' and ');
+}
+let speaking = 0;
+function speak(text, opt = {}) {
+  return new Promise(res => {
+    if (!hasTTS || !text) { res(); return; }
+    try {
+      if (opt.cancel) speechSynthesis.cancel();
+      const en = enMode(), u = new SpeechSynthesisUtterance(en ? toEn(text) : text);
+      u.lang = 'en-US'; const v = pickVoice(); if (v) u.voice = v;
+      u.rate = S.settings.rate; u.volume = clamp(S.settings.volume, 0, 1);
+      speaking++; Rec.sync();
+      let done = false;
+      const fin = () => { if (done) return; done = true; speaking = Math.max(0, speaking - 1); setTimeout(() => Rec.sync(), 300); res(); };
+      u.onend = fin; u.onerror = fin;
+      speechSynthesis.speak(u);
+      setTimeout(fin, 12000 + text.length * 120);
+    } catch (e) { res(); }
+  });
+}
+
+/* ============ αναγνώριση ομιλίας της συσκευής ============ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const Rec = {
+  ok: !!SR, inst: null, want: false, windowUntil: 0, winTimer: null, onHeard: null, onWindowEnd: null, fails: 0, disabledReason: '',
+  get inWindow() { return this.windowUntil > 0 && now() < this.windowUntil; },
+  setContinuous(on) { this.want = !!on; this.sync(); },
+  listenFor(ms, cb) {
+    this.windowUntil = now() + ms; this.onWindowEnd = cb || null;
+    clearTimeout(this.winTimer); this.winTimer = setTimeout(() => this.endWindow(), ms); this.sync();
+  },
+  cancelWindow() { this.onWindowEnd = null; this.endWindow(); },
+  endWindow() {
+    clearTimeout(this.winTimer); if (!this.windowUntil) return;
+    this.windowUntil = 0; const cb = this.onWindowEnd; this.onWindowEnd = null;
+    if (cb) cb(); this.sync();
+  },
+  desired() { if (!this.ok || this.disabledReason) return false; if (speaking > 0) return false; return this.inWindow || this.want; },
+  sync() {
+    const d = this.desired();
+    if (d && !this.inst) this.start(); else if (!d && this.inst) this.stop();
+    if (typeof UI !== 'undefined' && UI.micState) UI.micState();
+  },
+  start() {
+    let r; try { r = new SR(); } catch (e) { return; }
+    r.lang = recLang(); r.continuous = true; r.interimResults = false; r.maxAlternatives = 3;
+    r.onresult = e => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i]; if (!res.isFinal) continue;
+        const alts = []; for (let k = 0; k < res.length; k++) alts.push(res[k].transcript);
+        this.fails = 0; if (this.onHeard) this.onHeard(alts);
+      }
+    };
+    r.onerror = e => {
+      const er = e.error;
+      if (er === 'not-allowed' || er === 'service-not-allowed') this.disabledReason = 'Το μικρόφωνο δεν επιτρέπεται. Δώσε άδεια από τις ρυθμίσεις του προγράμματος περιήγησης.';
+      else if (er === 'network') { if (++this.fails >= 3) this.disabledReason = 'Η αναγνώριση φωνής χρειάζεται σύνδεση στο διαδίκτυο.'; }
+      else if (er === 'audio-capture') this.disabledReason = 'Δεν βρέθηκε μικρόφωνο.';
+      if (this.disabledReason && typeof UI !== 'undefined') UI.note(this.disabledReason);
+    };
+    r.onend = () => {
+      if (this.inst === r) this.inst = null;
+      if (this.desired()) setTimeout(() => { if (this.desired() && !this.inst) this.start(); }, 350);
+      if (typeof UI !== 'undefined' && UI.micState) UI.micState();
+    };
+    try { r.start(); this.inst = r; } catch (e) { this.inst = null; }
+  },
+  stop() {
+    const r = this.inst; this.inst = null;
+    if (r) { r.onend = null; r.onerror = null; r.onresult = null; try { r.abort(); } catch (e) { } }
+  }
+};
+
+/* ============ διατυπώσεις ============ */
+const minPhrase = n => n === 1 ? '1 λεπτό' : n + ' λεπτά';
+function durPhrase(min) { if (min >= 60) { const h = Math.floor(min / 60), m = min % 60; return (h === 1 ? '1 ώρα' : h + ' ώρες') + (m ? ' και ' + minPhrase(m) : ''); } return minPhrase(min); }
+function remPhrase(ms) {
+  if (ms <= 0) return 'Ο χρόνος τελείωσε';
+  if (ms >= 50000 && ms < 75000) return 'Απομένει 1 λεπτό';
+  if (ms < 90000) return 'Απομένουν ' + Math.max(5, Math.round(ms / 5000) * 5) + ' δευτερόλεπτα';
+  const m = Math.round(ms / 60000);
+  return (m === 1 || m === 60 ? 'Απομένει ' : 'Απομένουν ') + durPhrase(m);
+}
+function fmtClock(ms) { const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); }
+const PH = {
+  praise: ['Μπράβο!', 'Τέλεια!', 'Έγινε! Ωραία δουλειά.', 'Έτσι μπράβο!', 'Ένα λιγότερο!'],
+  good: ['Τέλεια, συνέχισε έτσι.', 'Ωραία, πάμε.', 'Μια χαρά! Συνεχίζουμε.'],
+  mid: 'Εντάξει, σιγά σιγά. Αν θες λίγο χρόνο παραπάνω, πες «πρόσθεσε πέντε λεπτά».',
+  skip: 'Εντάξει, το προσπερνάμε.',
+  unk: 'Δεν κατάλαβα.'
+};
+const QS = [n => `Πώς πάει; Η εργασία είναι: ${n}.`, n => `Έλα, πώς τα πας με αυτό: ${n};`, n => `Μια ματιά στην πρόοδο: ${n}. Πώς πάει;`, n => `Πώς είναι τα πράγματα με: ${n};`];
+const KIND = { start: 'start', half: 'warn', r10: 'warn', r5: 'warn', r2: 'warn', r1: 'warn', end: 'end' };
+const kindOf = k => KIND[k] || 'warn';
+
+/* ============ ειδοποιήσεις ============ */
+const EV = [];
+function notify(text) {
+  try { if (document.hidden && S.settings.notify && 'Notification' in window && Notification.permission === 'granted') new Notification('Δίπλα σου', { body: text, tag: 'diplasou' }); } catch (e) { }
+}
+function feedback(text, kind = 'ask', o = {}) {
+  const mode = o.mode || (R ? R.seq.alerts.mode : 'both');
+  EV.push({ text, kind, mode, voiceOnly: !!o.voiceOnly, t: now() });
+  if (o.voiceOnly) { if (mode !== 'sound') speak(text); return; }
+  if (mode === 'sound' || mode === 'both') playSound(kind);
+  if (mode === 'voice') speak(text);
+  else if (mode === 'both') setTimeout(() => speak(text), kind === 'end' ? 1000 : 700);
+  notify(text);
+}
+function alertText(it, key, rem) {
+  if (key === 'start') return it.kind === 'break' ? `Διάλειμμα. ${durPhrase(it.minutes)}.` : `Ξεκινάμε: ${it.name}. ${durPhrase(it.minutes)}.`;
+  if (key === 'half') return `Είμαστε στη μέση. ${remPhrase(rem)}.`;
+  if (/^[rc]\d+$/.test(key)) return remPhrase(parseInt(key.slice(1), 10) * 60000) + '.';
+  if (key === 'end') return it.kind === 'break' ? 'Τέλος διαλείμματος.' : (S.settings.endBehavior === 'ask' ? 'Ο χρόνος τελείωσε. Τελείωσες ή θες λίγο ακόμα;' : 'Ο χρόνος τελείωσε.');
+  return '';
+}
+
+/* ============ ακολουθία σε εξέλιξη ============ */
+let R = null, loopId = null, wl = null, micTestCb = null;
+const curItem = () => R && R.items[R.idx];
+const itemElapsed = it => it.elapsed + (it.status === 'running' ? now() - it.lastTs : 0);
+const itemPlanned = it => it.origMs + it.extra;
+const itemRemaining = it => itemPlanned(it) - itemElapsed(it);
+
+function buildQueue(seq) {
+  const q = [], brk = seq.breakMin || 0;
+  seq.tasks.forEach((t, i) => {
+    q.push({ kind: 'task', name: (t.name || '').trim() || 'Εργασία', type: t.type || 'general', minutes: t.minutes, alerts: t.alerts || seq.alerts });
+    if (brk > 0 && i < seq.tasks.length - 1) q.push({ kind: 'break', name: 'Διάλειμμα', type: 'break', minutes: brk, alerts: { mode: seq.alerts.mode, marks: ['start', 'end'], checkin: 0 } });
+  });
+  return q.map(it => Object.assign(it, { elapsed: 0, extra: 0, lastTs: 0, fired: {}, nextCheck: null, status: 'pending', origMs: it.minutes * 60000, overNext: 120000, overCount: 0, autoAt: 0, actual: 0 }));
+}
+async function wake() { if (!S.settings.wake || !('wakeLock' in navigator)) return; try { wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', () => { wl = null; }); } catch (e) { } }
+function unwake() { try { if (wl) wl.release(); } catch (e) { } wl = null; }
+function syncListen() { const it = curItem(); Rec.setContinuous(!!R && !R.finished && (S.settings.listen || (it && it.status === 'paused'))); }
+
+function startRun(seq) {
+  audioCtx();
+  if (hasTTS) { try { speechSynthesis.speak(new SpeechSynthesisUtterance('')); } catch (e) { } }
+  if (S.settings.notify && 'Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) { } }
+  const items = buildQueue(seq);
+  if (!items.length) { UI.toast('Πρόσθεσε πρώτα μία εργασία.'); return; }
+  R = { seq, items, idx: 0, pausedAt: 0, nudges: 0, doneCount: 0, finished: false, startedAt: now() };
+  UI.show('run'); wake();
+  beginItem(0); syncListen();
+  clearInterval(loopId); loopId = setInterval(() => { tick(); UI.updateRun(); }, 250);
+}
+function beginItem(i) {
+  R.idx = i; const it = R.items[i];
+  Object.assign(it, { status: 'running', lastTs: now(), elapsed: 0, extra: 0, fired: {}, overNext: 120000, overCount: 0, autoAt: 0 });
+  it.nextCheck = (it.kind === 'task' && it.alerts.checkin) ? it.alerts.checkin * 60000 : null;
+  UI.hideTip(); UI.renderRun();
+  if (it.alerts.marks.includes('start')) { it.fired.start = true; feedback(alertText(it, 'start'), 'start', { mode: it.alerts.mode }); }
+  else if (it.kind === 'task' && i > 0) feedback('Επόμενο: ' + it.name + '.', 'start', { voiceOnly: true, mode: it.alerts.mode });
+}
+function tick() {
+  if (!R || R.finished) return;
+  const it = curItem(); if (!it) return;
+  if (it.status === 'paused') {
+    const p = now() - R.pausedAt;
+    if (R.nudges < 3 && p >= 300000 + R.nudges * 600000) { R.nudges++; feedback('Είμαι εδώ όταν γυρίσεις. Πες συνέχεια.', 'ask'); }
+    return;
+  }
+  if (it.status !== 'running') return;
+  const el = itemElapsed(it), pl = itemPlanned(it), rem = pl - el, c = it.alerts, f = it.fired, due = [];
+  const mk = (k, p) => { if (c.marks.includes(k) && !f[k]) due.push({ k, p }); };
+  if (it.kind === 'task' && it.origMs >= 240000 && el >= it.origMs / 2 && rem > 30000) mk('half', pl - it.origMs / 2);
+  [10, 5, 2, 1].forEach(n => { if (n * 60000 < pl - 20000 && rem <= n * 60000 && rem > 0) mk('r' + n, n * 60000); });
+  c.marks.forEach(k => { const m = /^c(\d+)$/.exec(k); if (m) { const n = +m[1]; if (n * 60000 < pl - 20000 && rem <= n * 60000 && rem > 0) mk(k, n * 60000); } });
+  if (rem <= 0) {
+    if (!f.up) { f.up = true; timeUp(it, c.marks.includes('end')); } else overtimeTick(it, rem);
+    return;
+  }
+  if (due.length) { due.sort((a, b) => a.p - b.p); due.forEach(d => { f[d.k] = true; }); feedback(alertText(it, due[0].k, rem), kindOf(due[0].k), { mode: c.mode }); }
+  if (it.nextCheck !== null && el >= it.nextCheck) {
+    while (el >= it.nextCheck) it.nextCheck += c.checkin * 60000;
+    if (!due.length && rem > 90000 && !UI.checkinOpen()) askCheckin(it);
+  }
+}
+function askCheckin(it) {
+  const q = pick(QS, 'q')(it.name), m = it.alerts.mode;
+  feedback(q, 'ask', { mode: m });
+  UI.openCheckin({ q, sticky: false });
+  Rec.listenFor(14000 + ((m === 'voice' || m === 'both') ? q.length * 80 : 0), () => UI.closeCheckin(true));
+}
+function timeUp(it, withAlert) {
+  if (it.kind === 'break') { if (withAlert) feedback('Τέλος διαλείμματος.', 'end', { mode: it.alerts.mode }); finishCurrent('done'); return; }
+  if (S.settings.endBehavior === 'auto') { if (withAlert) feedback(alertText(it, 'end'), 'end', { mode: it.alerts.mode }); it.autoAt = now() + 3500; return; }
+  if (withAlert) feedback(alertText(it, 'end'), 'end', { mode: it.alerts.mode });
+  UI.openCheckin({ q: 'Ο χρόνος τελείωσε. Τελείωσες ή θες λίγο ακόμα;', sticky: true });
+  Rec.listenFor(15000 + 4000, null);
+}
+function overtimeTick(it, rem) {
+  if (S.settings.endBehavior === 'auto') { if (it.autoAt && now() >= it.autoAt) { it.autoAt = 0; finishCurrent('done'); } return; }
+  if (it.overCount < 5 && -rem >= it.overNext) {
+    it.overNext += 120000; it.overCount++;
+    feedback('Ακόμα εδώ; Πες «τελείωσα» ή «πρόσθεσε πέντε λεπτά».', 'ask', { mode: it.alerts.mode });
+    UI.openCheckin({ q: 'Ακόμα εδώ; Τελείωσες ή θες λίγο ακόμα;', sticky: true });
+    Rec.listenFor(12000, null);
+  }
+}
+
+/* ============ εντολές ============ */
+function applyIntent(intent, minutes) {
+  if (!R || R.finished) return;
+  switch (intent) {
+    case 'pause': pauseRun(false); break;
+    case 'break': pauseRun(true); break;
+    case 'resume': resumeRun(); break;
+    case 'done': finishCurrent('done'); break;
+    case 'skip': finishCurrent('skipped'); break;
+    case 'more': addTime(minutes || S.settings.addMin || 5); break;
+    case 'remaining': sayRemaining(); break;
+    case 'restart': restartItem(); break;
+    case 'stuck': onStuck(); break;
+    case 'good': UI.closeCheckin(); Rec.cancelWindow(); feedback(pick(PH.good, 'good'), 'ask', { voiceOnly: true }); break;
+    case 'mid': UI.closeCheckin(); Rec.cancelWindow(); feedback(PH.mid, 'ask', { voiceOnly: true }); break;
+    case 'stopall': UI.askStop(); break;
+    case 'tipok': UI.hideTip(); break;
+  }
+}
+function pauseRun(isBreak) {
+  const it = curItem(); if (!it || it.status !== 'running') return;
+  it.elapsed += now() - it.lastTs; it.status = 'paused'; R.pausedAt = now(); R.nudges = 0;
+  UI.closeCheckin(); UI.hideTip(); Rec.cancelWindow();
+  feedback(isBreak ? 'Εντάξει, πάρε διάλειμμα. Πες συνέχεια όταν γυρίσεις.' : 'Παύση. Πες συνέχεια όταν γυρίσεις.', 'ask');
+  syncListen(); UI.renderRun();
+}
+function resumeRun() {
+  const it = curItem(); if (!it || it.status !== 'paused') return;
+  it.lastTs = now(); it.status = 'running';
+  feedback(remPhrase(itemRemaining(it)) + '. Συνεχίζουμε.', 'start');
+  syncListen(); UI.renderRun();
+}
+function addTime(n) {
+  const it = curItem(); if (!it || (it.status !== 'running' && it.status !== 'paused')) return;
+  n = clamp(Math.round(n), 1, 60);
+  it.extra += n * 60000; const rem = itemRemaining(it);
+  [10, 5, 2, 1].forEach(m => { if (it.fired['r' + m] && rem > m * 60000) delete it.fired['r' + m]; });
+  delete it.fired.up; it.overNext = 120000; it.overCount = 0; it.autoAt = 0;
+  UI.closeCheckin(); UI.hideTip(); Rec.cancelWindow();
+  feedback(`Εντάξει, πρόσθεσα ${minPhrase(n)}.`, 'ask'); UI.renderRun();
+}
+function sayRemaining() { const it = curItem(); if (!it) return; const t = remPhrase(itemRemaining(it)) + '.'; feedback(t, 'ask'); UI.toast(t); }
+function restartItem() {
+  const it = curItem(); if (!it) return;
+  Object.assign(it, { elapsed: 0, extra: 0, lastTs: now(), status: 'running', fired: {}, overNext: 120000, overCount: 0, autoAt: 0 });
+  it.nextCheck = (it.kind === 'task' && it.alerts.checkin) ? it.alerts.checkin * 60000 : null;
+  UI.closeCheckin(); UI.hideTip(); Rec.cancelWindow(); syncListen();
+  feedback('Από την αρχή.', 'start'); UI.renderRun();
+}
+function onStuck() {
+  const it = curItem(); const tip = (TYPES[it.type] && TYPES[it.type].tip) || TYPES.general.tip;
+  UI.closeCheckin(); Rec.cancelWindow();
+  feedback('Κανένα πρόβλημα, συμβαίνει. ' + tip, 'ask'); UI.showTip(tip);
+}
+function recordHistory(it) {
+  if (it.actual < 0.25) return;
+  S.history.push({ type: it.type, key: norm(it.name), planned: it.origMs / 60000, actual: Math.max(0.5, Math.round(it.actual * 2) / 2), ts: Date.now() });
+  if (S.history.length > 300) S.history = S.history.slice(-300);
+  save();
+}
+function finishCurrent(how) {
+  const it = curItem(); if (!it || it.status === 'done' || it.status === 'skipped') return;
+  const el = itemElapsed(it); it.elapsed = el; it.actual = el / 60000;
+  it.status = how === 'done' ? 'done' : 'skipped';
+  if (it.kind === 'task' && how === 'done') { R.doneCount++; recordHistory(it); }
+  UI.closeCheckin(); UI.hideTip(); Rec.cancelWindow();
+  const next = R.idx + 1;
+  if (next >= R.items.length) { finishRun(); return; }
+  if (it.kind === 'task') feedback(how === 'done' ? pick(PH.praise, 'praise') : PH.skip, 'ask', { voiceOnly: true });
+  beginItem(next); syncListen();
+}
+function finishRun() {
+  R.finished = true; clearInterval(loopId); loopId = null; unwake(); Rec.cancelWindow(); Rec.setContinuous(false);
+  const n = R.doneCount, m = R.items.filter(x => x.kind === 'task').length;
+  feedback(`Τελείωσε η ακολουθία. Ολοκλήρωσες ${n} από ${m} ${m === 1 ? 'εργασία' : 'εργασίες'}. Μπράβο!`, 'end');
+  UI.renderDone(R);
+}
+function stopRun() {
+  if (!R) return;
+  clearInterval(loopId); loopId = null; unwake(); Rec.cancelWindow(); Rec.setContinuous(false);
+  try { if (hasTTS) speechSynthesis.cancel(); } catch (e) { }
+  speaking = 0; R = null; UI.show('home');
+}
+function handleHeard(alts) {
+  if (micTestCb) { const cb = micTestCb; micTestCb = null; Rec.cancelWindow(); cb(alts, classifyAlts(alts, { window: true })); return; }
+  UI.heard(alts[0]);
+  if (!R || R.finished) return;
+  const it = curItem(), win = Rec.inWindow || UI.checkinOpen();
+  const ctx = { window: win, paused: !!it && it.status === 'paused', confirm: UI.stopConfirmOpen() };
+  const res = classifyAlts(alts, ctx);
+  if (ctx.confirm) { if (res && res.intent === 'yes') UI.resolveStop(true); else if (res && res.intent === 'no') UI.resolveStop(false); return; }
+  if (!res) { if (win) feedback(PH.unk, 'ask', { voiceOnly: true }); return; }
+  applyIntent(res.intent, res.minutes);
+}
+Rec.onHeard = handleHeard;
+document.addEventListener('visibilitychange', () => { if (R && !R.finished && !document.hidden) { if (!wl) wake(); tick(); UI.updateRun(); } });
+/* ============ γλώσσα (ελληνικά / English) ============ */
+const EN_UI = {
+  'Πίσω': 'Back', 'Δίπλα σου': 'Beside you', 'Ρυθμίσεις': 'Settings', 'Νέα ακολουθία': 'New sequence', 'Σταμάτημα ακολουθίας': 'Stop sequence',
+  'σε εξέλιξη': 'running', '✓ Τελείωσα': '✓ Done', 'Τελείωσα': 'Done', 'Πάω καλά': 'Going well', 'Θέλω λίγο ακόμα': 'I need a bit more', 'Κόλλησα': "I'm stuck", 'Διακοπή': 'Interrupted',
+  'Ακούω την απάντησή σου…': 'Listening for your answer…', 'Παράλειψη': 'Skip', 'Εντάξει, δοκιμάζω': "Okay, I'll try", 'Παύση': 'Pause', '🎤 Μίλα': '🎤 Speak',
+  'Πες: «παύση», «συνέχεια», «τελείωσα», «πρόσθεσε πέντε λεπτά», «πόσο έμεινε»': 'Say: “pause”, “resume”, “done”, “add five minutes”, “how much is left”',
+  'Άκυρο': 'Cancel', 'Ναι': 'Yes', 'Διάλειμμα': 'Break', 'Συνέχεια': 'Resume', 'Πρόσθεσε χρόνο': 'Add time', 'Πόσο έμεινε': 'How much is left', 'Από την αρχή': 'From the start',
+  'Έτσι κι έτσι': 'So-so', 'Ακολουθία': 'Sequence',
+  'Οι φωνητικές απαντήσεις δουλεύουν σε Chrome, Edge ή Safari. Εδώ χρησιμοποίησε τα κουμπιά.': 'Voice answers work in Chrome, Edge or Safari. Here, use the buttons.',
+  'Αυτό το πρόγραμμα περιήγησης δεν έχει φωνή. Θα ακούς μόνο ήχους.': 'This browser has no speech voice. You will only hear sounds.',
+  '🎤 Μη διαθέσιμο': '🎤 Unavailable', '🎤 Χωρίς άδεια': '🎤 No permission', '🎤 Ακούω…': '🎤 Listening…',
+  'Να σταματήσω ολόκληρη την ακολουθία;': 'Stop the whole sequence?', 'Ναι, σταμάτα': 'Yes, stop', 'Ξεκουράσου λίγο': 'Rest a little', 'Επόμενο:': 'Next:', 'Αυτή είναι η τελευταία εργασία.': 'This is the last task.',
+  'σε παύση': 'paused', 'ο χρόνος τελείωσε': "time's up", 'διάλειμμα': 'break', 'λιγότερο από 1′': 'less than 1′', 'Τελείωσε η ακολουθία': 'Sequence finished', 'από': 'of', 'παραλείφθηκε': 'skipped', 'Ξανά': 'Again', 'Αρχική': 'Home',
+  'Φτιάξε την πρώτη σου ακολουθία': 'Create your first sequence', 'Μια σειρά από εργασίες, με χρόνο για την καθεμία. Η εφαρμογή μετράει, ειδοποιεί και ρωτάει πώς πάει.': 'A series of tasks, with a time for each. The app counts down, alerts you and asks how it is going.',
+  'Χωρίς όνομα': 'Untitled', 'εργασία': 'task', 'εργασίες': 'tasks', 'Έναρξη': 'Start', 'Επεξεργασία': 'Edit', 'άλλο': 'other', 'Άλλος χρόνος σε λεπτά': 'Other time in minutes', 'Πρόσθεσε': 'Add',
+  'Πώς να ειδοποιεί': 'How to alert', '🔔 Ήχος': '🔔 Sound', '🗣 Φωνή': '🗣 Voice', 'Και τα δύο': 'Both', 'Πότε': 'When', 'Πάτα για αφαίρεση': 'Tap to remove', '′ πριν': '′ before', 'Να ρωτάει πώς πάει': 'Ask how it is going',
+  'Κάθε': 'Every', '′ κάθε': '′ every', 'Ήχος (ισχύει για όλες τις ακολουθίες)': 'Sound (applies to all sequences)', 'π.χ. Πλύσιμο πιάτων': 'e.g. Wash the dishes', 'Λιγότερα λεπτά': 'Fewer minutes', 'Λεπτά': 'Minutes', 'λεπτά': 'minutes',
+  'Περισσότερα λεπτά': 'More minutes', 'Είδος εργασίας': 'Task type', 'Πάνω': 'Up', 'Κάτω': 'Down', 'Διαγραφή εργασίας': 'Delete task', '(δικές της)': '(its own)', 'Δικές της ειδοποιήσεις': 'Its own alerts', 'Ισχύουν οι ειδοποιήσεις της ακολουθίας.': "The sequence's alerts apply.",
+  'Όνομα ακολουθίας': 'Sequence name', 'π.χ. Συγύρισμα κουζίνας': 'e.g. Tidy the kitchen', 'Εργασίες': 'Tasks', '+ Προσθήκη εργασίας': '+ Add task', 'Διάλειμμα ανάμεσα στις εργασίες': 'Break between tasks', 'Κανένα': 'None', 'Έναρξη ακολουθίας': 'Start sequence', 'Αντίγραφο': 'Copy', 'Διαγραφή': 'Delete',
+  'Φωνή': 'Voice', 'Αυτόματη': 'Automatic', 'Ταχύτητα': 'Speed', 'Ένταση': 'Volume', 'Δοκιμή φωνής': 'Test voice', 'Ήχος ειδοποιήσεων': 'Alert sound', 'Δόνηση': 'Vibration', 'Σε κινητό, μαζί με τον ήχο': 'On a phone, together with the sound',
+  'Φωνητικές εντολές': 'Voice commands', 'Να ακούει συνεχώς όσο τρέχει η ακολουθία': 'Keep listening while a sequence runs', 'Αλλιώς ακούει μόνο όταν ρωτάει ή όταν πατήσεις «Μίλα»': 'Otherwise it listens only when it asks, or when you press “Speak”', 'Δοκιμή μικροφώνου': 'Test microphone',
+  'Πόσο χρόνο προσθέτει το «+»': 'How much time “+” adds', 'Όταν τελειώνει ο χρόνος': 'When time runs out', 'Ρώτα με': 'Ask me', 'Επόμενη εργασία': 'Next task', 'Οθόνη και ειδοποιήσεις': 'Screen and notifications', 'Να μένει αναμμένη η οθόνη': 'Keep the screen on', 'Όσο τρέχει μια ακολουθία': 'While a sequence runs',
+  'Ειδοποιήσεις συστήματος': 'System notifications', 'Όταν η εφαρμογή είναι στο παρασκήνιο': 'When the app is in the background', 'Μάθηση διάρκειας': 'Learning durations', 'Διαγραφή ιστορικού': 'Delete history', 'Αντίγραφο ασφαλείας': 'Backup', 'Αποθήκευση αρχείου': 'Save to file', 'Επαναφορά': 'Restore',
+  'Δεν υποστηρίζεται σε αυτό το πρόγραμμα περιήγησης.': 'Not supported in this browser.', 'Ακούω. Πες π.χ. «πρόσθεσε πέντε λεπτά».': 'Listening. Say e.g. “add five minutes”.', '→ δεν αντιστοιχεί σε εντολή': '→ does not match a command', 'Δεν άκουσα τίποτα. Έλεγξε το μικρόφωνο.': 'I heard nothing. Check the microphone.',
+  'Να αντικαταστήσω τα τωρινά δεδομένα με το αντίγραφο;': 'Replace the current data with the backup?', 'Ναι, αντικατάσταση': 'Yes, replace', 'Έγινε η επαναφορά.': 'Restored.', 'Το αρχείο δεν είναι έγκυρο αντίγραφο.': 'The file is not a valid backup.',
+  'Η φωνή δεν υποστηρίζεται εδώ. Χρησιμοποίησε τα κουμπιά.': 'Voice is not supported here. Use the buttons.', 'Γράψε λεπτά, από 1 έως 240.': 'Enter minutes, from 1 to 240.', 'Πρόσθεσε πρώτα μία εργασία.': 'Add a task first.', '(αντίγραφο)': '(copy)', 'Έγινε αντίγραφο.': 'Copied.',
+  'Να διαγράψω αυτή την ακολουθία;': 'Delete this sequence?', 'Ναι, διαγραφή': 'Yes, delete', 'Η ακρόαση ξεκινά όταν τρέξεις μια ακολουθία.': 'Listening starts when you run a sequence.', 'Να διαγράψω το ιστορικό διάρκειας;': 'Delete the duration history?',
+  'Το μικρόφωνο δεν επιτρέπεται. Δώσε άδεια από τις ρυθμίσεις του προγράμματος περιήγησης.': 'The microphone is not allowed. Grant permission in the browser settings.', 'Η αναγνώριση φωνής χρειάζεται σύνδεση στο διαδίκτυο.': 'Speech recognition needs an internet connection.', 'Δεν βρέθηκε μικρόφωνο.': 'No microphone found.',
+  'Γλώσσα': 'Language', 'Η φωνή της εφαρμογής μιλάει προς το παρόν μόνο αγγλικά. Εσύ απαντάς και διαβάζεις στη γλώσσα που διαλέγεις εδώ.': 'The app’s voice speaks English only for now. You read and answer in the language you choose here.',
+  'Δεν βρέθηκε αγγλική φωνή στη συσκευή.': 'No English voice found on this device.',
+  'Συγύρισμα κουζίνας': 'Tidy the kitchen', 'Μάζεμα πιάτων και ποτηριών': 'Collect plates and glasses', 'Πλύσιμο πιάτων': 'Wash the dishes', 'Καθάρισμα πάγκου': 'Wipe the counter', 'Σκουπίδια': 'Take out the trash',
+  'Διοικητικά του πρωινού': 'Morning admin', 'Απάντηση σε email': 'Answer emails', 'Λογαριασμοί': 'Bills', 'Τηλεφωνήματα': 'Phone calls',
+  'Έναρξη_': 'Start', 'Στη μέση': 'Halfway', 'Λήξη': 'End', '10′ πριν': '10′ before', '5′ πριν': '5′ before', '2′ πριν': '2′ before', '1′ πριν': '1′ before', 'Όχι': 'No',
+  'Απαλός': 'Soft', 'Καμπάνα': 'Bell', 'Νερό': 'Water',
+  'Σπίτι': 'Home', 'Μαγείρεμα': 'Cooking', 'Διοικητικά': 'Admin', 'Δημιουργία': 'Creative', 'Μελέτη': 'Study', 'Κίνηση': 'Movement', 'Φροντίδα': 'Self-care', 'Επικοινωνία': 'Communication', 'Δουλειές έξω': 'Errands', 'Οργάνωση': 'Organizing', 'Γενική': 'General',
+  'Διάλεξε ένα μόνο αντικείμενο και ξεκίνα από αυτό. Μόνο για δύο λεπτά.': 'Pick just one item and start with it. Only for two minutes.',
+  'Βγάλε στον πάγκο μόνο τα υλικά του πρώτου βήματος.': 'Put out only the ingredients for the first step.',
+  'Άνοιξε το πρώτο πράγμα και γράψε μόνο μία γραμμή.': 'Open the first item and write just one line.',
+  'Γράψε ή παίξε κάτι «κακό» επίτηδες, μόνο για να ξεκινήσεις.': 'Write or play something “bad” on purpose, just to get started.',
+  'Διάβασε μόνο την πρώτη παράγραφο.': 'Read only the first paragraph.', 'Κάνε μόνο την πρώτη κίνηση. Μετά βλέπουμε.': "Do just the first move. We'll see after that.",
+  'Κάνε μόνο το πρώτο βήμα, τίποτα άλλο.': 'Do only the first step, nothing else.', 'Γράψε τρεις λέξεις για το τι θα πεις και πάρε τηλέφωνο.': 'Write three words about what you will say, then call.',
+  'Βάλε παπούτσια και πάρε τα κλειδιά. Μόνο αυτό.': 'Put on your shoes and take your keys. Just that.', 'Διάλεξε ένα συρτάρι ή ένα σημείο και ξεκίνα από εκεί.': 'Pick one drawer or one spot and start there.',
+  'Κάνε το πιο μικρό βήμα που σκέφτεσαι, για δύο λεπτά.': 'Do the smallest step you can think of, for two minutes.'
+};
+const EN_TOK = [[/(\d+) από (\d+)/g, '$1 of $2'], [/(\d+) δευτερόλεπτα/g, '$1 seconds'], [/1 λεπτό/g, '1 minute'], [/(\d+) λεπτά/g, '$1 minutes'], [/1 ώρα/g, '1 hour'], [/(\d+) ώρες/g, '$1 hours'], [/(hours?) και /g, '$1 and '], [/(\d+) εργασίες/g, '$1 tasks'], [/1 εργασία/g, '1 task']];
+const EN_UI_RULES = [
+  [/^Εργασία (\d+) από (\d+)$/, 'Task $1 of $2'],
+  [/^Ολοκλήρωσες (\d+) από (\d+)\.$/, 'You completed $1 of $2.'],
+  [/^Όνομα εργασίας (\d+)$/, 'Task $1 name'],
+  [/^Ειδοποιήσεις αυτής της εργασίας(.*)$/, (m, r) => 'Alerts for this task' + (r ? ' ' + trPhrase(r.trim()) : '')],
+  [/^(\d+)′ πριν ✕$/, '$1′ before ✕'], [/^(\d+)′ πριν$/, '$1′ before'], [/^Κάθε (\d+)′$/, 'Every $1′'], [/^\+(\d+) λεπτά$/, '+$1 min'],
+  [/^Προτείνω (\d+)′(.*)$/, (m, n, r) => 'Suggested: ' + n + '′' + trPhrase(r)],
+  [/^, από τις προηγούμενες φορές$/, ', based on past runs'], [/^, συνήθως για «(.+)»$/, (m, t) => ', usually for “' + trPhrase(t) + '”'], [/^, για «(.+)»$/, (m, t) => ', for “' + trPhrase(t) + '”'],
+  [/^Έχω καταγράψει (\d+) ολοκληρωμένες εργασίες\. Από αυτές προτείνω ρεαλιστικούς χρόνους\.$/, "I've recorded $1 completed tasks. I use them to suggest realistic durations."],
+  [/^Στο «(.+)» χρειάστηκες περισσότερο χρόνο από τον προγραμματισμένο\. Την επόμενη φορά θα σου προτείνω πιο ρεαλιστική διάρκεια\.$/, 'On “$1” you needed more time than planned. Next time I will suggest a more realistic duration.'],
+  [/^Επόμενο: (.+), ([^,]+)$/, (m, n, d) => 'Next: ' + (EN_UI[n] || n) + ', ' + trPhrase(d)],
+  [/^Επόμενο: (.+)$/, (m, n) => 'Next: ' + (EN_UI[n] || n)],
+  [/^Άκουσα: «(.*)»$/, 'Heard: “$1”']
+];
+function trPhrase(s) {
+  if (EN_UI[s] !== undefined) return EN_UI[s];
+  const em = /^([^\p{L}\p{N}+]+\s)(.+)$/u.exec(s); if (em && EN_UI[em[2]] !== undefined) return em[1] + EN_UI[em[2]];
+  for (const [re, rep] of EN_UI_RULES) if (re.test(s)) return s.replace(re, rep);
+  for (const [re, rep] of EN_RULES) if (re.test(s)) return s.replace(re, rep);
+  let t = s; for (const [re, rep] of EN_TOK) t = t.replace(re, rep);
+  return t;
+}
+const GR = /[Ͱ-Ͽ]/;
+const trTo = s => { const en = trPhrase(s); return S.settings.lang === 'en' ? en : trLangFrom(en, S.settings.lang); };
+const trNode = n => {
+  if (n.parentElement && n.parentElement.closest('[data-nt]')) return;
+  if (S.settings.lang === 'el') { if (n.__el !== undefined) { n.nodeValue = n.__el; delete n.__el; delete n.__tr; } return; }
+  const v = n.nodeValue; if (n.__tr === v) return;
+  const m = /^(\s*)([\s\S]*?)(\s*)$/.exec(v); if (!m[2] || !GR.test(m[2])) return;
+  const t = trTo(m[2]); n.__el = v; n.nodeValue = n.__tr = m[1] + t + m[3];
+};
+const TR_ATTR = ['aria-label', 'title', 'placeholder'];
+function trEl(e) {
+  if (!e.__attr) e.__attr = {};
+  TR_ATTR.forEach(a => {
+    if (S.settings.lang === 'el') { if (e.__attr[a] !== undefined) { e.setAttribute(a, e.__attr[a]); delete e.__attr[a]; } return; }
+    const v = e.getAttribute(a); if (!v || !GR.test(v) || e.__attr['t' + a] === v) return;
+    const t = trTo(v); e.__attr[a] = v; e.__attr['t' + a] = t; e.setAttribute(a, t);
+  });
+}
+function trWalk(root) {
+  if (!root) return;
+  if (root.nodeType === 3) { trNode(root); return; }
+  if (root.nodeType !== 1 || /^(SCRIPT|STYLE)$/.test(root.tagName) || root.closest('[data-nt]')) return;
+  trEl(root);
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, { acceptNode: n => n.nodeType === 1 && (/^(SCRIPT|STYLE)$/.test(n.tagName) || n.hasAttribute('data-nt')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  let n; while ((n = w.nextNode())) { if (n.nodeType === 3) trNode(n); else trEl(n); }
+}
+let trObs = null, trBusy = false;
+function trApply() { document.documentElement.lang = (LANGS.find(x => x.code === S.settings.lang) || LANGS[0]).code; trBusy = true; trWalk(document.body); trBusy = false; }
+function trStart() {
+  trObs = new MutationObserver(ms => {
+    if (trBusy) return; trBusy = true;
+    ms.forEach(m => { if (m.type === 'childList') m.addedNodes.forEach(trWalk); else if (m.type === 'characterData') trNode(m.target); else if (m.type === 'attributes') trEl(m.target); });
+    trBusy = false;
+  });
+  trObs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: TR_ATTR });
+  trApply();
+}
+function setLang(l) { S.settings.lang = 'el'; trApply(); S.settings.lang = l; save(); trApply(); if (Rec.inst) { Rec.stop(); Rec.sync(); } }
+/* ============ λίστα γλωσσών (ίδια με τις άλλες εφαρμογές) ============ */
+const LANGS = [
+  { code: 'el', name: 'Ελληνικά', rec: 'el-GR' }, { code: 'en', name: 'English', rec: 'en-US' }, { code: 'de', name: 'Deutsch', rec: 'de-DE' },
+  { code: 'es', name: 'Español', rec: 'es-ES' }, { code: 'fr', name: 'Français', rec: 'fr-FR' }, { code: 'ru', name: 'Русский', rec: 'ru-RU' },
+  { code: 'zh', name: '中文', rec: 'zh-CN' }, { code: 'hi', name: 'हिन्दी', rec: 'hi-IN' }, { code: 'bn', name: 'বাংলা', rec: 'bn-IN' },
+  { code: 'ta', name: 'தமிழ்', rec: 'ta-IN' }, { code: 'te', name: 'తెలుగు', rec: 'te-IN' }, { code: 'mr', name: 'मराठी', rec: 'mr-IN' }
+];
+const recLang = () => (LANGS.find(x => x.code === S.settings.lang) || LANGS[0]).rec;
+
+/* Μεταφράσεις βασικών κειμένων. Κλειδί: τα αγγλικά. Ό,τι λείπει εμφανίζεται στα αγγλικά. */
+const LKEYS = ['Back', 'Settings', 'New sequence', 'Stop sequence', 'running', 'Done', 'Going well', 'I need a bit more', "I'm stuck", 'Interrupted', 'Skip', 'Pause', 'Speak', 'Cancel', 'Yes', 'No', 'Break', 'Resume', 'Add time', 'How much is left', 'Start', 'Edit', 'Delete', 'Minutes', 'Language', 'Voice', 'Home', 'Tasks', 'Sequence', 'Again', 'Sequence finished', 'paused', 'Listening…', 'Volume', 'Speed', 'Vibration', 'Backup', 'Restore', '+ Add task', 'Start sequence', 'Alert sound', 'Both', 'Sound', 'Beside you', 'The app’s voice speaks English only for now. You read and answer in the language you choose here.'];
+const LT = {
+  de: ['Zurück', 'Einstellungen', 'Neue Abfolge', 'Abfolge beenden', 'läuft', 'Fertig', 'Läuft gut', 'Ich brauche etwas mehr', 'Ich hänge fest', 'Unterbrochen', 'Überspringen', 'Pause', 'Sprechen', 'Abbrechen', 'Ja', 'Nein', 'Auszeit', 'Fortsetzen', 'Zeit hinzufügen', 'Wie viel Zeit bleibt', 'Start', 'Bearbeiten', 'Löschen', 'Minuten', 'Sprache', 'Stimme', 'Startseite', 'Aufgaben', 'Abfolge', 'Nochmal', 'Abfolge beendet', 'pausiert', 'Ich höre zu…', 'Lautstärke', 'Tempo', 'Vibration', 'Sicherung', 'Wiederherstellen', '+ Aufgabe hinzufügen', 'Abfolge starten', 'Signalton', 'Beides', 'Ton', 'An deiner Seite', 'Die Stimme der App spricht vorerst nur Englisch. Du liest und antwortest in der Sprache, die du hier wählst.'],
+  es: ['Atrás', 'Ajustes', 'Nueva secuencia', 'Detener secuencia', 'en curso', 'Hecho', 'Va bien', 'Necesito un poco más', 'Estoy atascado', 'Interrumpido', 'Omitir', 'Pausa', 'Hablar', 'Cancelar', 'Sí', 'No', 'Descanso', 'Continuar', 'Añadir tiempo', 'Cuánto queda', 'Empezar', 'Editar', 'Eliminar', 'Minutos', 'Idioma', 'Voz', 'Inicio', 'Tareas', 'Secuencia', 'Otra vez', 'Secuencia terminada', 'en pausa', 'Escuchando…', 'Volumen', 'Velocidad', 'Vibración', 'Copia de seguridad', 'Restaurar', '+ Añadir tarea', 'Iniciar secuencia', 'Sonido de alerta', 'Ambos', 'Sonido', 'A tu lado', 'La voz de la app habla solo en inglés por ahora. Tú lees y respondes en el idioma que elijas aquí.'],
+  fr: ['Retour', 'Réglages', 'Nouvelle séquence', 'Arrêter la séquence', 'en cours', 'Terminé', 'Ça va bien', 'Il me faut un peu plus', 'Je suis bloqué', 'Interrompu', 'Passer', 'Pause', 'Parler', 'Annuler', 'Oui', 'Non', 'Coupure', 'Reprendre', 'Ajouter du temps', 'Combien de temps reste-t-il', 'Démarrer', 'Modifier', 'Supprimer', 'Minutes', 'Langue', 'Voix', 'Accueil', 'Tâches', 'Séquence', 'Encore', 'Séquence terminée', 'en pause', 'J’écoute…', 'Volume', 'Vitesse', 'Vibration', 'Sauvegarde', 'Restaurer', '+ Ajouter une tâche', 'Lancer la séquence', 'Son d’alerte', 'Les deux', 'Son', 'À tes côtés', 'La voix de l’appli parle uniquement anglais pour le moment. Tu lis et réponds dans la langue choisie ici.'],
+  ru: ['Назад', 'Настройки', 'Новая последовательность', 'Остановить последовательность', 'идёт', 'Готово', 'Идёт хорошо', 'Нужно ещё немного', 'Я застрял', 'Прервано', 'Пропустить', 'Пауза', 'Говорить', 'Отмена', 'Да', 'Нет', 'Перерыв', 'Продолжить', 'Добавить время', 'Сколько осталось', 'Старт', 'Изменить', 'Удалить', 'Минуты', 'Язык', 'Голос', 'Главная', 'Задачи', 'Последовательность', 'Заново', 'Последовательность завершена', 'на паузе', 'Слушаю…', 'Громкость', 'Скорость', 'Вибрация', 'Резервная копия', 'Восстановить', '+ Добавить задачу', 'Запустить последовательность', 'Звук сигнала', 'Оба', 'Звук', 'Рядом с тобой', 'Голос приложения пока говорит только по-английски. Читаешь и отвечаешь ты на выбранном здесь языке.'],
+  zh: ['返回', '设置', '新序列', '停止序列', '进行中', '完成', '进展顺利', '我还需要一点时间', '我卡住了', '被打断', '跳过', '暂停', '说话', '取消', '是', '否', '休息', '继续', '增加时间', '还剩多少时间', '开始', '编辑', '删除', '分钟', '语言', '语音', '首页', '任务', '序列', '重来', '序列已完成', '已暂停', '正在听…', '音量', '语速', '振动', '备份', '恢复', '+ 添加任务', '开始序列', '提示音', '两者', '声音', '在你身边', '应用的语音目前只说英语。你可以用在此选择的语言阅读和回答。'],
+  hi: ['वापस', 'सेटिंग्स', 'नया क्रम', 'क्रम रोकें', 'चल रहा है', 'हो गया', 'ठीक चल रहा है', 'मुझे थोड़ा और समय चाहिए', 'मैं अटक गया/गई', 'रुकावट आई', 'छोड़ें', 'विराम', 'बोलें', 'रद्द करें', 'हाँ', 'नहीं', 'ब्रेक', 'जारी रखें', 'समय जोड़ें', 'कितना समय बचा है', 'शुरू करें', 'संपादित करें', 'हटाएँ', 'मिनट', 'भाषा', 'आवाज़', 'होम', 'कार्य', 'क्रम', 'फिर से', 'क्रम पूरा हुआ', 'रुका हुआ', 'सुन रहा हूँ…', 'वॉल्यूम', 'गति', 'कंपन', 'बैकअप', 'पुनर्स्थापित करें', '+ कार्य जोड़ें', 'क्रम शुरू करें', 'अलर्ट ध्वनि', 'दोनों', 'ध्वनि', 'तुम्हारे साथ', 'ऐप की आवाज़ फ़िलहाल केवल अंग्रेज़ी में बोलती है। तुम यहाँ चुनी भाषा में पढ़ते और जवाब देते हो।'],
+  bn: ['ফিরে যাও', 'সেটিংস', 'নতুন ক্রম', 'ক্রম থামাও', 'চলছে', 'হয়ে গেছে', 'ভালো চলছে', 'আমার আরও একটু সময় লাগবে', 'আমি আটকে গেছি', 'বাধা পড়েছে', 'এড়িয়ে যাও', 'বিরতি', 'বলো', 'বাতিল', 'হ্যাঁ', 'না', 'বিশ্রাম', 'আবার শুরু', 'সময় যোগ করো', 'কতটা সময় বাকি', 'শুরু', 'সম্পাদনা', 'মুছে ফেলো', 'মিনিট', 'ভাষা', 'কণ্ঠ', 'হোম', 'কাজ', 'ক্রম', 'আবার', 'ক্রম শেষ হয়েছে', 'বিরতিতে', 'শুনছি…', 'ভলিউম', 'গতি', 'কম্পন', 'ব্যাকআপ', 'পুনরুদ্ধার', '+ কাজ যোগ করো', 'ক্রম শুরু করো', 'সতর্কতার শব্দ', 'দুটোই', 'শব্দ', 'তোমার পাশে', 'অ্যাপের কণ্ঠ আপাতত শুধু ইংরেজিতে কথা বলে। তুমি এখানে বেছে নেওয়া ভাষায় পড়ো ও উত্তর দাও।'],
+  ta: ['பின்', 'அமைப்புகள்', 'புதிய வரிசை', 'வரிசையை நிறுத்து', 'ஓடுகிறது', 'முடிந்தது', 'நன்றாகப் போகிறது', 'இன்னும் கொஞ்சம் நேரம் வேண்டும்', 'நான் சிக்கிக்கொண்டேன்', 'இடையூறு', 'தவிர்', 'இடைநிறுத்து', 'பேசு', 'ரத்துசெய்', 'ஆம்', 'இல்லை', 'ஓய்வு', 'தொடர்', 'நேரம் சேர்', 'எவ்வளவு நேரம் மீதம்', 'தொடங்கு', 'திருத்து', 'நீக்கு', 'நிமிடங்கள்', 'மொழி', 'குரல்', 'முகப்பு', 'பணிகள்', 'வரிசை', 'மீண்டும்', 'வரிசை முடிந்தது', 'இடைநிறுத்தப்பட்டது', 'கேட்கிறேன்…', 'ஒலி அளவு', 'வேகம்', 'அதிர்வு', 'காப்புப்பிரதி', 'மீட்டமை', '+ பணி சேர்', 'வரிசையைத் தொடங்கு', 'எச்சரிக்கை ஒலி', 'இரண்டும்', 'ஒலி', 'உன் அருகில்', 'செயலியின் குரல் தற்போது ஆங்கிலத்தில் மட்டுமே பேசும். நீ இங்கே தேர்ந்தெடுக்கும் மொழியில் படித்து பதிலளிக்கலாம்.'],
+  te: ['వెనుకకు', 'సెట్టింగ్‌లు', 'కొత్త క్రమం', 'క్రమాన్ని ఆపు', 'నడుస్తోంది', 'పూర్తయింది', 'బాగా సాగుతోంది', 'నాకు ఇంకొంచెం సమయం కావాలి', 'నేను ఇరుక్కున్నాను', 'అంతరాయం', 'దాటవేయి', 'ఆపు', 'మాట్లాడు', 'రద్దు', 'అవును', 'కాదు', 'విశ్రాంతి', 'కొనసాగించు', 'సమయం జోడించు', 'ఎంత సమయం మిగిలింది', 'ప్రారంభించు', 'సవరించు', 'తొలగించు', 'నిమిషాలు', 'భాష', 'స్వరం', 'హోమ్', 'పనులు', 'క్రమం', 'మళ్ళీ', 'క్రమం పూర్తయింది', 'ఆపివేయబడింది', 'వింటున్నాను…', 'వాల్యూమ్', 'వేగం', 'కంపనం', 'బ్యాకప్', 'పునరుద్ధరించు', '+ పని జోడించు', 'క్రమాన్ని ప్రారంభించు', 'హెచ్చరిక శబ్దం', 'రెండూ', 'శబ్దం', 'నీ పక్కన', 'యాప్ స్వరం ప్రస్తుతం ఇంగ్లీష్‌లో మాత్రమే మాట్లాడుతుంది. నువ్వు ఇక్కడ ఎంచుకున్న భాషలో చదివి, సమాధానం ఇవ్వవచ్చు.'],
+  mr: ['मागे', 'सेटिंग्ज', 'नवा क्रम', 'क्रम थांबवा', 'सुरू आहे', 'झाले', 'छान चालले आहे', 'मला थोडा आणखी वेळ हवा', 'मी अडकलो आहे', 'व्यत्यय', 'वगळा', 'विराम', 'बोला', 'रद्द करा', 'होय', 'नाही', 'विश्रांती', 'पुढे चालू ठेवा', 'वेळ जोडा', 'किती वेळ उरला आहे', 'सुरू करा', 'संपादित करा', 'हटवा', 'मिनिटे', 'भाषा', 'आवाज', 'मुख्यपृष्ठ', 'कामे', 'क्रम', 'पुन्हा', 'क्रम पूर्ण झाला', 'थांबवले आहे', 'ऐकत आहे…', 'आवाजाची पातळी', 'गती', 'कंपन', 'बॅकअप', 'पुनर्संचयित करा', '+ काम जोडा', 'क्रम सुरू करा', 'सूचना ध्वनी', 'दोन्ही', 'ध्वनी', 'तुझ्या सोबत', 'अ‍ॅपचा आवाज सध्या फक्त इंग्रजीत बोलतो. तू येथे निवडलेल्या भाषेत वाचतोस आणि उत्तर देतोस.']
+};
+/* πρότυπα: εργασία Ν από Μ, Επόμενο:, ′ πριν, λεπτά, 1 λεπτό */
+const LTPL = {
+  de: ['Aufgabe {1} von {2}', 'Weiter: ', '{n}′ vorher', '{n} Minuten', '1 Minute', '{n} Aufgaben', '1 Aufgabe'], es: ['Tarea {1} de {2}', 'Siguiente: ', '{n}′ antes', '{n} minutos', '1 minuto', '{n} tareas', '1 tarea'],
+  fr: ['Tâche {1} sur {2}', 'Suivant : ', '{n}′ avant', '{n} minutes', '1 minute', '{n} tâches', '1 tâche'], ru: ['Задача {1} из {2}', 'Далее: ', 'за {n}′', '{n} мин.', '1 мин.', '{n} задач', '1 задача'],
+  zh: ['任务 {1}/{2}', '下一个：', '提前 {n}′', '{n} 分钟', '1 分钟', '{n} 项任务', '1 项任务'], hi: ['कार्य {1}/{2}', 'अगला: ', '{n}′ पहले', '{n} मिनट', '1 मिनट', '{n} कार्य', '1 कार्य'],
+  bn: ['কাজ {1}/{2}', 'পরেরটি: ', '{n}′ আগে', '{n} মিনিট', '1 মিনিট', '{n}টি কাজ', '1টি কাজ'], ta: ['பணி {1}/{2}', 'அடுத்தது: ', '{n}′ முன்', '{n} நிமிடங்கள்', '1 நிமிடம்', '{n} பணிகள்', '1 பணி'],
+  te: ['పని {1}/{2}', 'తర్వాత: ', '{n}′ ముందు', '{n} నిమిషాలు', '1 నిమిషం', '{n} పనులు', '1 పని'], mr: ['काम {1}/{2}', 'पुढील: ', '{n}′ आधी', '{n} मिनिटे', '1 मिनिट', '{n} कामे', '1 काम']
+};
+const LDICT = {};
+Object.keys(LT).forEach(c => { LDICT[c] = {}; LKEYS.forEach((k, i) => { LDICT[c][k] = LT[c][i]; }); });
+function trLangFrom(en, code) {
+  const d = LDICT[code], tp = LTPL[code]; if (!d) return en;
+  if (d[en] !== undefined) return d[en];
+  const em = /^([^\p{L}\p{N}+]+\s)(.+)$/u.exec(en); if (em && d[em[2]] !== undefined) return em[1] + d[em[2]];
+  let m;
+  if ((m = /^Task (\d+) of (\d+)$/.exec(en))) return tp[0].replace('{1}', m[1]).replace('{2}', m[2]);
+  if ((m = /^Next: (.+)$/.exec(en))) return tp[1] + (d[m[1]] !== undefined ? d[m[1]] : m[1]);
+  if ((m = /^(\d+)′ before$/.exec(en))) return tp[2].replace('{n}', m[1]);
+  if ((m = /^(\d+) minutes$/.exec(en))) return tp[3].replace('{n}', m[1]);
+  if (en === '1 minute') return tp[4];
+  if ((m = /^(\d+) tasks$/.exec(en))) return tp[5].replace('{n}', m[1]);
+  if (en === '1 task') return tp[6];
+  if (en.includes(', ')) { const parts = en.split(', '), out = parts.map(x => trLangFrom(x, code)); if (out.some((x, i) => x !== parts[i])) return out.join(', '); }
+  return en;
+}
+
+/* Εντολές και απαντήσεις σε κάθε γλώσσα (καταλαβαίνονται πάντα, ανεξάρτητα από τη γλώσσα της οθόνης).
+   Το «0» μέσα σε φράση σημαίνει αριθμό. */
+const XP = {
+  de: { pause: ['pause', 'warte', 'moment', 'augenblick', 'stopp'], resume: ['weiter', 'fortsetzen', 'ich bin zurück'], done: ['fertig', 'erledigt', 'geschafft'], remaining: ['wie viel zeit', 'wieviel zeit', 'wie lange noch', 'wie viel noch'], skip: ['überspringen', 'ueberspringen'], stopall: ['alles beenden', 'alles stoppen', 'abbrechen'], good: ['gut', 'prima', 'alles gut', 'läuft'], stuck: ['ich hänge', 'ich haenge', 'ich komme nicht weiter', 'ich weiß nicht', 'zu schwer', 'hilfe'], brk: ['auszeit', 'ich bin müde', 'ich bin muede'], mid: ['nicht gut', 'so lala', 'geht so'], more: ['mehr zeit', 'noch 0 minuten', '0 minuten mehr', 'verlängere', 'verlaengere', 'zeit hinzufügen'], yes: ['ja', 'klar', 'genau'], no: ['nein', 'nicht'] },
+  es: { pause: ['pausa', 'espera', 'un momento', 'un segundo', 'alto'], resume: ['continua', 'continuar', 'sigue', 'sigamos', 'ya volví', 'he vuelto'], done: ['terminé', 'he terminado', 'listo', 'hecho', 'acabé'], remaining: ['cuánto queda', 'cuánto tiempo queda', 'cuánto falta', 'qué falta'], skip: ['omitir', 'salta', 'sáltalo'], stopall: ['para todo', 'detener todo', 'cancelar todo', 'terminar la secuencia'], good: ['bien', 'va bien', 'todo bien', 'perfecto', 'genial', 'fácil'], stuck: ['estoy atascado', 'estoy atascada', 'no puedo', 'no sé', 'me bloqueé', 'ayuda', 'muy difícil'], brk: ['descanso', 'estoy cansado', 'estoy cansada'], mid: ['no va bien', 'regular', 'más o menos'], more: ['más tiempo', '0 minutos más', 'otros 0 minutos', 'añade', 'agrega', 'prolonga'], yes: ['sí', 'claro', 'vale', 'correcto'], no: ['no'] },
+  fr: { pause: ['pause', 'attends', 'attendez', 'un instant', 'un moment', 'une seconde'], resume: ['reprends', 'reprendre', 'continue', 'continuer', 'je suis de retour', 'on y va'], done: ['terminé', 'fini', 'j’ai fini', 'c’est fait', 'j’ai terminé'], remaining: ['combien de temps', 'combien reste', 'temps restant'], skip: ['passe', 'passer', 'saute', 'sauter'], stopall: ['tout arrêter', 'arrête tout', 'annule tout', 'fin de la séquence'], good: ['bien', 'ça va', 'ça se passe bien', 'tout va bien', 'facile', 'parfait'], stuck: ['je suis bloqué', 'je suis bloquée', 'je n’y arrive pas', 'je ne sais pas', 'trop dur', 'à l’aide', 'aide'], brk: ['coupure', 'je suis fatigué', 'je suis fatiguée', 'repos'], mid: ['pas terrible', 'pas bien', 'moyen', 'comme ci comme ça'], more: ['plus de temps', 'encore 0 minutes', '0 minutes de plus', 'rajoute', 'ajoute', 'prolonge'], yes: ['oui', 'bien sûr', 'd’accord', 'exact'], no: ['non', 'pas'] },
+  ru: { pause: ['пауза', 'стоп', 'подожди', 'погоди', 'минутку', 'секунду', 'момент'], resume: ['продолжить', 'продолжай', 'продолжаем', 'я вернулся', 'я вернулась', 'дальше', 'поехали'], done: ['готово', 'закончил', 'закончила', 'сделал', 'сделала', 'завершил', 'завершила'], remaining: ['сколько осталось', 'сколько времени', 'сколько ещё'], skip: ['пропустить', 'пропусти', 'пропускаю'], stopall: ['остановить всё', 'стоп всё', 'отмени всё', 'хватит на сегодня'], good: ['хорошо', 'нормально', 'отлично', 'идёт хорошо', 'легко'], stuck: ['я застрял', 'я застряла', 'не могу', 'не знаю', 'трудно', 'слишком сложно', 'помоги', 'помощь'], brk: ['перерыв', 'отдых', 'я устал', 'я устала'], mid: ['не очень', 'так себе', 'не хорошо', 'неважно'], more: ['ещё время', 'ещё 0 мин', '0 мин ещё', 'добавь', 'продли', 'больше времени'], yes: ['да', 'конечно', 'верно'], no: ['нет', 'не'] },
+  zh: { pause: ['暂停', '等一下', '等等', '稍等', '停一下'], resume: ['继续', '我回来了', '接着'], done: ['完成', '做完了', '好了', '结束了', '搞定'], remaining: ['还剩', '还有多久', '剩多少', '多少时间'], skip: ['跳过'], stopall: ['全部停止', '停止所有', '全部结束', '结束序列'], good: ['顺利', '很好', '不错', '还行', '挺好', '没问题'], stuck: ['卡住', '不会', '做不了', '太难', '不知道', '帮帮我'], brk: ['休息', '累了', '我累'], mid: ['不顺利', '不太好', '一般', '马马虎虎'], more: ['再加', '增加时间', '多一点时间', '延长', '再给'], yes: ['是', '好', '对', '确定', '可以'], no: ['不', '别', '没有'] },
+  hi: { pause: ['रुको', 'रुकिए', 'एक मिनट', 'ठहरो', 'पॉज़', 'विराम'], resume: ['जारी रखो', 'जारी', 'फिर से शुरू', 'मैं वापस आ गया', 'मैं वापस आ गई', 'चलो'], done: ['हो गया', 'पूरा हो गया', 'खत्म', 'ख़त्म', 'समाप्त'], remaining: ['कितना समय', 'कितना बचा', 'कितना बाकी', 'कितने मिनट'], skip: ['छोड़ो', 'छोड़ दो', 'स्किप'], stopall: ['सब रोक दो', 'सब बंद', 'सब कुछ रोको', 'आज के लिए बस'], good: ['ठीक चल', 'अच्छा चल', 'बढ़िया', 'आसान', 'सब ठीक', 'ठीक है'], stuck: ['अटक', 'नहीं कर पा', 'नहीं जानता', 'नहीं जानती', 'मुश्किल', 'बहुत कठिन', 'मदद'], brk: ['ब्रेक', 'आराम', 'थक गया', 'थक गई'], mid: ['ठीक-ठाक', 'ठीकठाक', 'ऐसे ही', 'ठीक नहीं', 'अच्छा नहीं'], more: ['और समय', 'और 0 मिनट', '0 मिनट और', 'समय बढ़ा', 'जोड़ो', 'बढ़ाओ'], yes: ['हाँ', 'हां', 'जी', 'सही'], no: ['नहीं', 'ना'] },
+  bn: { pause: ['থামো', 'দাঁড়াও', 'এক মিনিট', 'এক সেকেন্ড', 'বিরতি'], resume: ['আবার শুরু', 'চালিয়ে যাও', 'চালিয়ে', 'আমি ফিরে এসেছি'], done: ['হয়ে গেছে', 'শেষ', 'সম্পন্ন', 'করে ফেলেছি'], remaining: ['কতটা সময়', 'কত সময়', 'কত বাকি', 'কত মিনিট'], skip: ['এড়িয়ে', 'বাদ দাও', 'স্কিপ'], stopall: ['সব থামাও', 'সব বন্ধ', 'আজকের মতো যথেষ্ট'], good: ['ভালো চলছে', 'ভালো আছে', 'ঠিক আছে', 'সহজ', 'দারুণ'], stuck: ['আটকে', 'পারছি না', 'জানি না', 'কঠিন', 'সাহায্য'], brk: ['বিশ্রাম', 'ক্লান্ত', 'ব্রেক'], mid: ['এমনি', 'মোটামুটি', 'ভালো না', 'ভালো নয়'], more: ['আরও সময়', 'আরও 0 মিনিট', '0 মিনিট আরও', 'সময় বাড়া'], yes: ['হ্যাঁ', 'হ্যা', 'ঠিক'], no: ['না', 'নয়'] },
+  ta: { pause: ['நிறுத்து', 'நிறுத்துங்கள்', 'காத்திரு', 'ஒரு நிமிடம்', 'ஒரு நொடி', 'இடைநிறுத்து'], resume: ['தொடர்', 'தொடரலாம்', 'மீண்டும் தொடங்கு', 'நான் திரும்பி வந்துவிட்டேன்'], done: ['முடிந்தது', 'முடித்துவிட்டேன்', 'முடிந்துவிட்டது'], remaining: ['எவ்வளவு நேரம்', 'எவ்வளவு மீதம்', 'எத்தனை நிமிடம்'], skip: ['தவிர்', 'தாண்டு'], stopall: ['எல்லாவற்றையும் நிறுத்து', 'எல்லாம் நிறுத்து', 'இன்றைக்கு போதும்'], good: ['நன்றாக', 'நல்லா', 'சரி', 'எளிது'], stuck: ['சிக்கிக்', 'முடியவில்லை', 'தெரியவில்லை', 'கடினம்', 'உதவி'], brk: ['ஓய்வு', 'களைப்பாக', 'இடைவேளை'], mid: ['பரவாயில்லை', 'அப்படியே', 'நன்றாக இல்லை'], more: ['இன்னும் நேரம்', 'இன்னும் 0 நிமிடம்', '0 நிமிடம் கூடுதல்', 'நேரம் சேர்'], yes: ['ஆம்', 'சரி', 'ஆமாம்'], no: ['இல்லை', 'வேண்டாம்'] },
+  te: { pause: ['ఆపు', 'ఆగు', 'ఒక నిమిషం', 'ఒక క్షణం', 'పాజ్'], resume: ['కొనసాగించు', 'కొనసాగు', 'మళ్ళీ మొదలు', 'నేను తిరిగి వచ్చాను'], done: ['పూర్తయింది', 'అయిపోయింది', 'ముగిసింది'], remaining: ['ఎంత సమయం', 'ఎంత మిగిలింది', 'ఎన్ని నిమిషాలు'], skip: ['దాటవేయి', 'స్కిప్', 'వదిలేయి'], stopall: ['అన్నీ ఆపు', 'ఈరోజుకు చాలు'], good: ['బాగా', 'బాగుంది', 'సరే', 'సులభం'], stuck: ['ఇరుక్కు', 'చేయలేను', 'తెలియదు', 'కష్టం', 'సహాయం'], brk: ['విశ్రాంతి', 'అలసిపోయాను', 'బ్రేక్'], mid: ['అంతంత మాత్రం', 'పర్వాలేదు', 'బాగాలేదు'], more: ['ఇంకా సమయం', 'ఇంకా 0 నిమిషాలు', '0 నిమిషాలు ఎక్కువ', 'సమయం జోడించు'], yes: ['అవును', 'సరే'], no: ['కాదు', 'వద్దు'] },
+  mr: { pause: ['थांब', 'थांबा', 'एक मिनिट', 'एक सेकंद', 'विराम'], resume: ['पुढे चालू', 'चालू ठेवा', 'परत सुरू', 'मी परत आलो', 'मी परत आले'], done: ['झाले', 'पूर्ण झाले', 'संपले'], remaining: ['किती वेळ', 'किती उरले', 'किती मिनिटे'], skip: ['वगळा', 'सोड', 'स्किप'], stopall: ['सगळे थांबवा', 'सर्व थांबवा', 'आजसाठी पुरे'], good: ['छान', 'चांगले', 'ठीक आहे', 'सोपे'], stuck: ['अडकलो', 'अडकले', 'जमत नाही', 'माहीत नाही', 'कठीण', 'मदत'], brk: ['विश्रांती', 'दमलो', 'दमले', 'ब्रेक'], mid: ['ठीकठाक', 'बरे आहे', 'चांगले नाही'], more: ['आणखी वेळ', 'आणखी 0 मिनिटे', '0 मिनिटे जास्त', 'वेळ वाढव'], yes: ['होय', 'हो', 'बरोबर'], no: ['नाही', 'नको'] }
+};
+const mkMore = ph => { const n = norm(ph), anchor = CJK.test(n) ? '' : '(^| )'; return new RegExp(anchor + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/0/g, '\\d+')); };
+Object.keys(XP).forEach(c => {
+  const x = XP[c];
+  ['pause', 'resume', 'done', 'remaining', 'skip', 'stopall', 'good', 'stuck', 'brk', 'mid'].forEach(k => { if (x[k]) P[k === 'brk' ? 'brk' : k].push(...L(x[k])); });
+  (x.more || []).forEach(ph => MORE_RE.push(mkMore(ph)));
+  YES_X.push(...L(x.yes || [])); NO_X.push(...L(x.no || []));
+});
+/* ============ Android (Capacitor): φωνή και ήχος του συστήματος ============
+   Στην εφαρμογή Android η φωνή και η ακρόαση περνούν από τα πρόσθετα της συσκευής.
+   Η εφαρμογή ζητά «εστίαση ήχου» από το Android: όσο μιλάει, η μουσική άλλης εφαρμογής (π.χ. Spotify) χαμηλώνει.
+   Όταν περιμένει την απάντησή σου, η μουσική σταματά, χαμηλώνει ή μένει ως έχει, ανάλογα με τη ρύθμιση. */
+const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const NP = NATIVE ? (window.Capacitor.Plugins || {}) : {};
+let duckMode = null;
+function duckRefresh() {
+  if (!NATIVE || !NP.AudioDuck) return;
+  let m = null;
+  if (speaking > 0) m = 'duck';
+  else if (Rec.inWindow && !Rec.disabledReason && S.settings.musicListen !== 'none') m = S.settings.musicListen === 'duck' ? 'duck' : 'exclusive';
+  if (m === duckMode) return; duckMode = m;
+  try { (m ? NP.AudioDuck.request({ mode: m }) : NP.AudioDuck.abandon()).catch(() => { }); } catch (e) { }
+}
+if (NATIVE && NP.TextToSpeech) {
+  speak = function (text, opt = {}) {
+    return new Promise(res => {
+      if (!text) { res(); return; }
+      speaking++; Rec.sync();
+      let done = false;
+      const fin = () => { if (done) return; done = true; speaking = Math.max(0, speaking - 1); setTimeout(() => Rec.sync(), 300); res(); };
+      try {
+        NP.TextToSpeech.speak({ text: toEn(text), lang: 'en-US', rate: S.settings.rate, pitch: 1, volume: clamp(S.settings.volume, 0, 1), queueStrategy: opt.cancel ? 0 : 1 }).then(fin, fin);
+      } catch (e) { fin(); }
+      setTimeout(fin, 15000 + text.length * 120);
+    });
+  };
+}
+if (NATIVE && NP.SpeechRecognition) {
+  let permOk = null, avOk = null;
+  Rec.ok = true; Rec.disabledReason = '';
+  const syncOrig = Rec.sync.bind(Rec);
+  Rec.sync = function () { syncOrig(); duckRefresh(); };
+  Rec.start = function () {
+    if (this.inst) return;
+    const tok = { alive: true }; this.inst = tok;
+    const finish = () => {
+      if (this.inst === tok) this.inst = null;
+      duckRefresh();
+      if (this.desired()) setTimeout(() => { if (this.desired() && !this.inst) this.start(); }, 500);
+      if (typeof UI !== 'undefined' && UI.micState) UI.micState();
+    };
+    (async () => {
+      try {
+        if (permOk === null) { const p = await NP.SpeechRecognition.requestPermissions(); permOk = p && p.speechRecognition === 'granted'; }
+        if (!permOk) { this.disabledReason = 'Το μικρόφωνο δεν επιτρέπεται. Δώσε άδεια από τις ρυθμίσεις της εφαρμογής στο Android.'; if (typeof UI !== 'undefined') UI.note(this.disabledReason); return; }
+        if (avOk === null) { const av = await NP.SpeechRecognition.available(); avOk = !!(av && av.available); }
+        if (!avOk) { this.disabledReason = 'Η αναγνώριση φωνής δεν είναι διαθέσιμη σε αυτή τη συσκευή.'; if (typeof UI !== 'undefined') UI.note(this.disabledReason); return; }
+        duckRefresh();
+        const r = await NP.SpeechRecognition.start({ language: recLang(), maxResults: 3, prompt: '', partialResults: false, popup: false });
+        if (tok.alive && r && r.matches && r.matches.length) { this.fails = 0; if (this.onHeard) this.onHeard(r.matches); }
+      } catch (e) { /* καμία ομιλία ή διακοπή: ξαναπροσπαθεί ο βρόχος */ }
+    })().then(finish, finish);
+    if (typeof UI !== 'undefined' && UI.micState) UI.micState();
+  };
+  Rec.stop = function () {
+    const t = this.inst; this.inst = null; if (t) t.alive = false;
+    try { NP.SpeechRecognition.stop().catch(() => { }); } catch (e) { }
+    duckRefresh();
+  };
+}
+if (NATIVE) { try { document.documentElement.classList.add('native'); } catch (e) { } }
+
+/* ============ διεπαφή ============ */
+const VIEWS = ['home', 'edit', 'run', 'done', 'settings'];
+const INTENT_L = { done: 'Τελείωσα', pause: 'Παύση', break: 'Διάλειμμα', resume: 'Συνέχεια', skip: 'Παράλειψη', more: 'Πρόσθεσε χρόνο', remaining: 'Πόσο έμεινε', restart: 'Από την αρχή', stuck: 'Κόλλησα', good: 'Πάω καλά', mid: 'Έτσι κι έτσι', stopall: 'Σταμάτημα ακολουθίας' };
+let view = 'home', prevView = 'home', ED = null, ck = { open: false, sticky: false }, stopOpen = false, modalRes = null;
+
+function askConfirm(text, yes = 'Ναι') {
+  return new Promise(res => {
+    if (modalRes) modalRes(false);
+    modalRes = res; $('#modal-text').textContent = text; $('#modal-yes').textContent = yes; $('#modal').hidden = false; $('#modal-yes').focus();
+  });
+}
+function closeModal(v) { $('#modal').hidden = true; const r = modalRes; modalRes = null; if (r) r(v); }
+
+const UI = {
+  _note: '', _tt: 0, _ht: 0,
+  show(v) {
+    if (v === 'settings') prevView = view !== 'settings' ? view : prevView;
+    view = v; VIEWS.forEach(x => { $('#view-' + x).hidden = x !== v; });
+    document.body.dataset.view = v;
+    $('#btn-back').hidden = (v === 'home' || v === 'run' || v === 'done');
+    $('#btn-settings').hidden = (v === 'settings' || v === 'run');
+    $('#title').textContent = { home: 'Δίπλα σου', edit: 'Ακολουθία', settings: 'Ρυθμίσεις', done: 'Δίπλα σου', run: '' }[v];
+    if (v === 'home') { renderHome(); document.title = 'Δίπλα σου'; }
+    if (v === 'settings') renderSettings();
+    UI.refreshNote(); window.scrollTo(0, 0);
+  },
+  toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(UI._tt); UI._tt = setTimeout(() => el.classList.remove('on'), 2600); },
+  note(t) { UI._note = t; UI.refreshNote(); },
+  refreshNote() {
+    const base = [];
+    if (!Rec.ok) base.push('Οι φωνητικές απαντήσεις δουλεύουν σε Chrome, Edge ή Safari. Εδώ χρησιμοποίησε τα κουμπιά.');
+    if (!hasTTS && !NATIVE) base.push('Αυτό το πρόγραμμα περιήγησης δεν έχει φωνή. Θα ακούς μόνο ήχους.');
+    const txt = UI._note || ((view === 'run' || view === 'settings') ? base.join(' ') : '');
+    const el = $('#support-note'); el.textContent = txt; el.hidden = !txt;
+  },
+  micState() {
+    const b = $('#b-mic'); if (!b) return;
+    if (!Rec.ok) { b.disabled = true; b.textContent = '🎤 Μη διαθέσιμο'; }
+    else if (Rec.disabledReason) { b.disabled = true; b.textContent = '🎤 Χωρίς άδεια'; }
+    else { b.disabled = false; const on = !!Rec.inst; b.classList.toggle('listening', on); b.textContent = on ? '🎤 Ακούω…' : '🎤 Μίλα'; }
+    const l = $('#ck-listen'); if (l) l.hidden = !(ck.open && Rec.inst);
+  },
+  heard(t) { const h = $('#heard'); h.textContent = 'Άκουσα: «' + t + '»'; clearTimeout(UI._ht); UI._ht = setTimeout(() => { h.textContent = ''; }, 6000); },
+  openCheckin(o) { ck = { open: true, sticky: !!o.sticky }; $('#ck-q').textContent = o.q; $('#checkin').hidden = false; $('#tipcard').hidden = true; UI.micState(); },
+  closeCheckin(fromWindow) { if (fromWindow && ck.sticky) return; ck.open = false; $('#checkin').hidden = true; UI.micState(); },
+  checkinOpen() { return ck.open; },
+  showTip(t) { $('#tip-text').textContent = t; $('#tipcard').hidden = false; },
+  hideTip() { $('#tipcard').hidden = true; },
+  askStop(viaVoice = true) {
+    if (stopOpen) return; stopOpen = true;
+    askConfirm('Να σταματήσω ολόκληρη την ακολουθία;', 'Ναι, σταμάτα').then(ok => { stopOpen = false; if (ok) stopRun(); });
+    if (viaVoice) { feedback('Να σταματήσω όλη την ακολουθία; Πες ναι ή όχι.', 'ask'); Rec.listenFor(14000, null); }
+  },
+  stopConfirmOpen() { return stopOpen; },
+  resolveStop(ok) { closeModal(ok); },
+  renderRun() {
+    const it = curItem(); if (!R || !it) return;
+    const tasks = R.items.filter(x => x.kind === 'task');
+    $('#run-seq').textContent = R.seq.name || 'Ακολουθία';
+    $('#run-count').textContent = it.kind === 'task' ? `Εργασία ${tasks.indexOf(it) + 1} από ${tasks.length}` : 'Διάλειμμα';
+    $('#run-segs').innerHTML = R.items.map((x, i) => `<i class="${x.status === 'done' ? 'done' : x.status === 'skipped' ? 'skip' : i === R.idx ? 'cur' : ''}"></i>`).join('');
+    $('#run-task').textContent = it.name;
+    $('#run-type').textContent = it.kind === 'break' ? 'Ξεκουράσου λίγο' : TYPES[it.type].i + ' ' + TYPES[it.type].l;
+    const nx = R.items[R.idx + 1];
+    $('#run-next').textContent = nx ? 'Επόμενο: ' + nx.name + ', ' + durPhrase(nx.minutes) : 'Αυτή είναι η τελευταία εργασία.';
+    const paused = it.status === 'paused', bp = $('#b-pause');
+    bp.textContent = paused ? 'Συνέχεια' : 'Παύση'; bp.classList.toggle('primary', paused);
+    $('#hints').hidden = !Rec.ok;
+    $('#view-run').dataset.st = paused ? 'paused' : (itemRemaining(it) <= 0 ? 'over' : 'running');
+    UI.micState(); UI.updateRun();
+  },
+  updateRun() {
+    if (!R || R.finished) return; const it = curItem(); if (!it) return;
+    const rem = itemRemaining(it), pl = itemPlanned(it), paused = it.status === 'paused', over = rem <= 0;
+    $('#run-time').textContent = over ? '+' + fmtClock(-rem) : fmtClock(rem);
+    $('#run-state').textContent = paused ? 'σε παύση' : over ? 'ο χρόνος τελείωσε' : (it.kind === 'break' ? 'διάλειμμα' : 'σε εξέλιξη');
+    const frac = over ? 1 : clamp(rem / pl, 0, 1);
+    $('#ring').style.strokeDashoffset = String(628.32 * (over ? 0 : 1 - frac));
+    $('#view-run').dataset.st = paused ? 'paused' : over ? 'over' : 'running';
+    document.title = (over ? '+' : '') + fmtClock(over ? -rem : rem) + ' – ' + it.name;
+  },
+  renderDone(r) {
+    UI.show('done'); document.title = 'Δίπλα σου';
+    const tasks = r.items.filter(x => x.kind === 'task');
+    const fm = m => m < 1 ? 'λιγότερο από 1′' : Math.round(m) + '′';
+    let h = `<div class="big-msg">Τελείωσε η ακολουθία</div><p class="mute">Ολοκλήρωσες ${r.doneCount} από ${tasks.length}.</p><ul class="sum">`;
+    tasks.forEach(t => { h += `<li><b>${esc(t.name)}</b><span class="tag">${t.status === 'done' ? fm(t.actual) + ' από ' + t.minutes + '′' : 'παραλείφθηκε'}</span></li>`; });
+    h += '</ul>';
+    const long = tasks.filter(t => t.status === 'done' && t.actual > t.minutes * 1.25 && t.actual >= 3);
+    if (long.length) h += `<div class="note">Στο «${esc(long[0].name)}» χρειάστηκες περισσότερο χρόνο από τον προγραμματισμένο. Την επόμενη φορά θα σου προτείνω πιο ρεαλιστική διάρκεια.</div>`;
+    h += `<div class="row" style="margin-top:18px"><button class="btn primary" data-act="again">Ξανά</button><button class="btn ghost" data-act="home">Αρχική</button></div>`;
+    $('#view-done').innerHTML = h;
+  }
+};
+
+/* ---- αρχική ---- */
+const seqTotal = q => q.tasks.reduce((a, t) => a + t.minutes, 0) + (q.breakMin || 0) * Math.max(0, q.tasks.length - 1);
+window.__dpVoices = () => { if (!$('#view-home').hidden) renderHome(); };
+const voiceWarn = () => '';
+function renderHome() {
+  const el = $('#seq-list');
+  if (!S.sequences.length) { el.innerHTML = '<div class="empty"><b>Φτιάξε την πρώτη σου ακολουθία</b>Μια σειρά από εργασίες, με χρόνο για την καθεμία. Η εφαρμογή μετράει, ειδοποιεί και ρωτάει πώς πάει.</div>'; return; }
+  el.innerHTML = voiceWarn() + S.sequences.map(q => `<div class="seq" data-id="${q.id}"><h2>${esc(q.name || 'Χωρίς όνομα')}</h2>
+    <div class="meta">${q.tasks.length} ${q.tasks.length === 1 ? 'εργασία' : 'εργασίες'}, ${durPhrase(seqTotal(q))}</div>
+    <div class="tasks-line" data-nt>${q.tasks.slice(0, 4).map(t => esc(t.name || '—')).join(', ')}${q.tasks.length > 4 ? '…' : ''}</div>
+    <div class="row"><button class="btn primary" data-act="run">Έναρξη</button><button class="btn ghost" data-act="edit">Επεξεργασία</button></div></div>`).join('');
+}
+
+/* ---- επεξεργασία ---- */
+const custIn = (kind, scope, unit) => `<span class="cust"><input type="number" inputmode="numeric" min="1" max="240" placeholder="άλλο" aria-label="Άλλος χρόνος σε λεπτά" data-cu="${kind}"><span class="u">${unit}</span><button type="button" class="chip" data-cuadd="${kind}" data-scope="${scope || ''}" aria-label="Πρόσθεσε">＋</button></span>`;
+const customMarks = cfg => cfg.marks.filter(k => /^c\d+$/.test(k)).sort((a, b) => parseInt(b.slice(1), 10) - parseInt(a.slice(1), 10));
+function alertEditor(cfg, scope, withSound) {
+  const seg = (items, cur, key) => `<div class="seg" role="group">${items.map(([v, l]) => `<button type="button" aria-pressed="${cur === v}" data-ae="${key}" data-v="${v}" data-scope="${scope}">${l}</button>`).join('')}</div>`;
+  return `<h3>Πώς να ειδοποιεί</h3>${seg([['sound', '🔔 Ήχος'], ['voice', '🗣 Φωνή'], ['both', 'Και τα δύο']], cfg.mode, 'mode')}
+    <h3>Πότε</h3><div class="chips">${MARKS.map(([v, l]) => `<button type="button" class="chip" aria-pressed="${cfg.marks.includes(v)}" data-ae="mark" data-v="${v}" data-scope="${scope}">${l}</button>`).join('')}${customMarks(cfg).map(k => `<button type="button" class="chip" aria-pressed="true" data-ae="mark" data-v="${k}" data-scope="${scope}" title="Πάτα για αφαίρεση">${k.slice(1)}′ πριν ✕</button>`).join('')}${custIn('mark', scope, '′ πριν')}</div>
+    <h3>Να ρωτάει πώς πάει</h3>${seg(CHECKINS.some(([v]) => v === cfg.checkin) ? CHECKINS : [...CHECKINS, [cfg.checkin, 'Κάθε ' + cfg.checkin + '′']], cfg.checkin, 'checkin')}<div class="row" style="margin-top:8px">${custIn('checkin', scope, '′ κάθε')}</div>
+    ${withSound ? `<h3>Ήχος (ισχύει για όλες τις ακολουθίες)</h3><div class="snd">${SOUNDS.map(([v, l]) => `<button type="button" aria-pressed="${S.settings.sound === v}" data-ae="sound" data-v="${v}">▶ ${l}</button>`).join('')}</div>` : ''}`;
+}
+function taskRow(t, i, last) {
+  return `<li class="task" data-id="${t.id}">
+    <div class="task-main"><span class="ix">${i + 1}</span><input class="text t-name" value="${esc(t.name)}" placeholder="π.χ. Πλύσιμο πιάτων" maxlength="80" aria-label="Όνομα εργασίας ${i + 1}"></div>
+    <div class="task-line2">
+      <div class="stepper"><button type="button" class="icon sm" data-act="min-" aria-label="Λιγότερα λεπτά">−</button><input class="t-min" type="number" inputmode="numeric" min="1" max="240" value="${t.minutes}" aria-label="Λεπτά"><span class="mute">λεπτά</span><button type="button" class="icon sm" data-act="min+" aria-label="Περισσότερα λεπτά">+</button></div>
+      <select class="type-sel" aria-label="Είδος εργασίας">${TYPE_ORDER.map(k => `<option value="${k}" ${t.type === k ? 'selected' : ''}>${TYPES[k].i} ${TYPES[k].l}</option>`).join('')}</select>
+    </div>
+    <div class="task-tools"><button type="button" class="chip sug" data-act="sug" hidden></button><span class="spacer"></span>
+      <button type="button" class="icon sm" data-act="up" aria-label="Πάνω" ${i === 0 ? 'disabled' : ''}>↑</button>
+      <button type="button" class="icon sm" data-act="down" aria-label="Κάτω" ${last ? 'disabled' : ''}>↓</button>
+      <button type="button" class="icon sm" data-act="del" aria-label="Διαγραφή εργασίας">✕</button></div>
+    <details class="al" ${ED.open.has(t.id) ? 'open' : ''}><summary>Ειδοποιήσεις αυτής της εργασίας${t.alerts ? ' (δικές της)' : ''}</summary>
+      <label class="row" style="margin:8px 0"><span class="sw"><input type="checkbox" data-act="own" ${t.alerts ? 'checked' : ''}></span><span>Δικές της ειδοποιήσεις</span></label>
+      ${t.alerts ? '<div class="panel">' + alertEditor(t.alerts, 'task:' + t.id, false) + '</div>' : '<p class="mute small">Ισχύουν οι ειδοποιήσεις της ακολουθίας.</p>'}
+    </details></li>`;
+}
+function renderEdit() {
+  const q = ED.seq, y = window.scrollY;
+  $('#view-edit').innerHTML = `
+    <label class="field" for="e-name">Όνομα ακολουθίας</label>
+    <input class="text" id="e-name" value="${esc(q.name)}" placeholder="π.χ. Συγύρισμα κουζίνας" maxlength="60">
+    <h3 style="margin:24px 0 0;font-size:20px">Εργασίες</h3>
+    <ol class="tasks" id="e-tasks">${q.tasks.map((t, i) => taskRow(t, i, i === q.tasks.length - 1)).join('')}</ol>
+    <button class="btn wide" data-act="add">+ Προσθήκη εργασίας</button>
+    <div class="panel"><h3>Διάλειμμα ανάμεσα στις εργασίες</h3>
+      <div class="seg">${[[0, 'Κανένα'], [1, '1′'], [2, '2′'], [5, '5′'], ...([0, 1, 2, 5].includes(q.breakMin || 0) ? [] : [[q.breakMin, q.breakMin + '′']])].map(([v, l]) => `<button type="button" aria-pressed="${(q.breakMin || 0) === v}" data-act="brk" data-v="${v}">${l}</button>`).join('')}</div><div class="row" style="margin-top:8px">${custIn('brk', '', '′')}</div></div>
+    <div class="panel">${alertEditor(q.alerts, 'seq', true)}</div>
+    <div class="row" style="margin-top:20px"><button class="btn primary" data-act="start">Έναρξη ακολουθίας</button><button class="btn ghost" data-act="dup">Αντίγραφο</button><span class="spacer"></span><button class="btn danger" data-act="delseq">Διαγραφή</button></div>`;
+  $$('#e-tasks .task').forEach(row => refreshRow(row));
+  window.scrollTo(0, y);
+}
+function refreshRow(row) {
+  const t = ED.seq.tasks.find(x => x.id === row.dataset.id); if (!t) return;
+  const sel = $('.type-sel', row); if (sel.value !== t.type) sel.value = t.type;
+  const chip = $('.sug', row), p = predict(t.name, t.type);
+  if (t.name.trim() && p.m !== t.minutes && (p.src !== 'default' || t.type !== 'general')) {
+    chip.hidden = false; chip.dataset.m = p.m;
+    chip.textContent = 'Προτείνω ' + p.m + '′' + (p.src === 'name' ? ', από τις προηγούμενες φορές' : p.src === 'type' ? ', συνήθως για «' + TYPES[t.type].l + '»' : ', για «' + TYPES[t.type].l + '»');
+  } else chip.hidden = true;
+}
+function openEditor(q, isNew) { ED = { seq: q, isNew: !!isNew, open: new Set() }; UI.show('edit'); renderEdit(); }
+function cleanupSeq() {
+  const q = ED.seq; q.tasks = q.tasks.filter(t => t.name.trim());
+  if (!q.tasks.length && !q.name.trim()) S.sequences = S.sequences.filter(x => x !== q);
+  else if (!q.name.trim()) q.name = 'Νέα ακολουθία';
+  save();
+}
+function leaveEdit() { cleanupSeq(); ED = null; UI.show('home'); }
+function cfgFor(scope) { return scope === 'seq' ? ED.seq.alerts : (ED.seq.tasks.find(t => t.id === scope.slice(5)) || {}).alerts; }
+function stepMin(t, dir) { const m = t.minutes; return clamp(dir > 0 ? (m < 10 ? m + 1 : m + 5) : (m <= 10 ? m - 1 : m - 5), 1, 240); }
+
+/* ---- ρυθμίσεις ---- */
+function renderSettings() {
+  const gv = englishVoices(), list = gv, st = S.settings;
+  const sw = (k, label, sub) => `<div class="s-row"><div class="l">${label}${sub ? `<small>${sub}</small>` : ''}</div><span class="sw"><input type="checkbox" data-set="${k}" ${st[k] ? 'checked' : ''}></span></div>`;
+  $('#view-settings').innerHTML = `
+    <div class="panel"><h3>Γλώσσα</h3>
+      <select class="type-sel" data-set="lang" aria-label="Γλώσσα" style="width:100%">${LANGS.map(l => `<option value="${l.code}" ${st.lang === l.code ? 'selected' : ''}>${l.name}</option>`).join('')}</select>
+      <p class="mute small" style="margin-top:8px">Η φωνή της εφαρμογής μιλάει προς το παρόν μόνο αγγλικά. Εσύ απαντάς και διαβάζεις στη γλώσσα που διαλέγεις εδώ.</p></div>
+    <div class="panel"><h3>Φωνή</h3>
+      ${NATIVE ? '' : hasTTS && !gv.length ? '<p class="mute small">Δεν βρέθηκε αγγλική φωνή στη συσκευή.</p>' : ''}
+      ${NATIVE ? '' : `<div class="s-row"><div class="l">Φωνή</div><select class="type-sel" data-set="voiceURI" style="max-width:60%"><option value="">Αυτόματη</option>${list.map(v => `<option value="${esc(v.voiceURI)}" ${st.voiceURI === v.voiceURI ? 'selected' : ''}>${esc(v.name)} (${esc(v.lang)})</option>`).join('')}</select></div>`}
+      <div class="s-row" style="display:block"><div class="l">Ταχύτητα</div><input type="range" min="0.7" max="1.3" step="0.05" value="${st.rate}" data-set="rate"></div>
+      <div class="s-row" style="display:block"><div class="l">Ένταση</div><input type="range" min="0.2" max="1" step="0.05" value="${st.volume}" data-set="volume"></div>
+      <button class="btn sm" data-act="test-voice" style="margin-top:8px">Δοκιμή φωνής</button></div>
+    <div class="panel"><h3>Ήχος ειδοποιήσεων</h3><div class="snd">${SOUNDS.map(([v, l]) => `<button type="button" aria-pressed="${st.sound === v}" data-ae="sound" data-v="${v}">▶ ${l}</button>`).join('')}</div>
+      ${sw('vibrate', 'Δόνηση', 'Σε κινητό, μαζί με τον ήχο')}</div>
+    ${NATIVE ? `<div class="panel"><h3>Μουσική από άλλη εφαρμογή</h3>
+      <div class="s-row"><div class="l">Όταν η εφαρμογή μιλάει</div><span class="mute small">χαμηλώνει</span></div>
+      <div class="s-row"><div class="l">Όταν ακούει την απάντησή σου</div><select class="type-sel" data-set="musicListen" style="max-width:55%">${[['pause', 'Σταματά'], ['duck', 'Χαμηλώνει'], ['none', 'Δεν αλλάζει']].map(([v, l]) => `<option value="${v}" ${st.musicListen === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>` : ''}
+    <div class="panel"><h3>Φωνητικές εντολές</h3>
+      ${sw('listen', 'Να ακούει συνεχώς όσο τρέχει η ακολουθία', 'Αλλιώς ακούει μόνο όταν ρωτάει ή όταν πατήσεις «Μίλα»')}
+      <button class="btn sm" data-act="test-mic" style="margin-top:8px">Δοκιμή μικροφώνου</button><p class="mute small" id="mic-out" style="margin-top:8px"></p></div>
+    <div class="panel"><h3>Πόσο χρόνο προσθέτει το «+»</h3>
+      <div class="seg">${[3, 5, 10, ...([3, 5, 10].includes(st.addMin) ? [] : [st.addMin])].map(v => `<button type="button" aria-pressed="${st.addMin === v}" data-ae="addmin" data-v="${v}">${v}′</button>`).join('')}</div>
+      <div class="row" style="margin-top:8px">${custIn('addmin', '', '′')}</div></div>
+    <div class="panel"><h3>Όταν τελειώνει ο χρόνος</h3>
+      <div class="seg">${[['ask', 'Ρώτα με'], ['auto', 'Επόμενη εργασία']].map(([v, l]) => `<button type="button" aria-pressed="${st.endBehavior === v}" data-set="endBehavior" data-v="${v}">${l}</button>`).join('')}</div></div>
+    <div class="panel"><h3>Οθόνη και ειδοποιήσεις</h3>
+      ${sw('wake', 'Να μένει αναμμένη η οθόνη', 'Όσο τρέχει μια ακολουθία')}
+      ${sw('notify', 'Ειδοποιήσεις συστήματος', 'Όταν η εφαρμογή είναι στο παρασκήνιο')}</div>
+    <div class="panel"><h3>Μάθηση διάρκειας</h3><p class="mute">Έχω καταγράψει ${S.history.length} ολοκληρωμένες εργασίες. Από αυτές προτείνω ρεαλιστικούς χρόνους.</p>
+      <button class="btn sm danger" data-act="reset-history">Διαγραφή ιστορικού</button></div>
+    <div class="panel"><h3>Αντίγραφο ασφαλείας</h3><div class="row"><button class="btn sm" data-act="export">Αποθήκευση αρχείου</button><label class="btn sm" style="cursor:pointer">Επαναφορά<input type="file" id="imp" accept="application/json" hidden></label></div></div>`;
+}
+function micTest() {
+  const out = $('#mic-out');
+  if (!Rec.ok) { out.textContent = 'Δεν υποστηρίζεται σε αυτό το πρόγραμμα περιήγησης.'; return; }
+  if (Rec.disabledReason) { out.textContent = Rec.disabledReason; return; }
+  out.textContent = 'Ακούω. Πες π.χ. «πρόσθεσε πέντε λεπτά».';
+  micTestCb = (alts, res) => { out.textContent = 'Άκουσα: «' + alts[0] + '»' + (res ? ' → ' + INTENT_L[res.intent] + (res.minutes ? ' (' + res.minutes + '′)' : '') : ' → δεν αντιστοιχεί σε εντολή'); };
+  Rec.listenFor(9000, () => { if (micTestCb) { micTestCb = null; out.textContent = 'Δεν άκουσα τίποτα. Έλεγξε το μικρόφωνο.'; } });
+}
+function exportData() {
+  const b = new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' }), a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'diplasou-antigrafo.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function importData(file) {
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const r = JSON.parse(fr.result); if (!r || !Array.isArray(r.sequences)) throw 0;
+      askConfirm('Να αντικαταστήσω τα τωρινά δεδομένα με το αντίγραφο;', 'Ναι, αντικατάσταση').then(ok => { if (!ok) return; S = normalizeState(r); save(); UI.toast('Έγινε η επαναφορά.'); renderSettings(); });
+    } catch (e) { UI.toast('Το αρχείο δεν είναι έγκυρο αντίγραφο.'); }
+  };
+  fr.readAsText(file);
+}
+
+/* ---- συνδέσεις γεγονότων ---- */
+$('#btn-settings').onclick = () => UI.show('settings');
+$('#btn-back').onclick = () => { if (view === 'edit') leaveEdit(); else UI.show(prevView === 'edit' || prevView === 'settings' ? 'home' : prevView); };
+$('#btn-new').onclick = () => {
+  const q = { id: uid(), name: '', breakMin: 0, alerts: cloneAlerts(DEFAULT_ALERTS), tasks: [{ id: uid(), name: '', minutes: 10, type: 'general', typeManual: false, alerts: null }] };
+  S.sequences.push(q); save(); openEditor(q, true);
+  setTimeout(() => { const i = $('#e-name'); if (i) i.focus(); }, 30);
+};
+$('#seq-list').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const q = S.sequences.find(x => x.id === b.closest('.seq').dataset.id); if (!q) return;
+  if (b.dataset.act === 'run') startRun(q); else if (b.dataset.act === 'edit') openEditor(q);
+});
+$('#modal-yes').onclick = () => closeModal(true);
+$('#modal-no').onclick = () => closeModal(false);
+$('#b-done').onclick = () => applyIntent('done');
+$('#b-pause').onclick = () => { const it = curItem(); if (it && it.status === 'paused') resumeRun(); else pauseRun(false); };
+$('#b-more').onclick = () => addTime(S.settings.addMin || 5);
+$('#b-skip').onclick = () => applyIntent('skip');
+$('#btn-stop').onclick = () => UI.askStop(false);
+$('#b-mic').onclick = () => { audioCtx(); if (!Rec.ok) { UI.toast('Η φωνή δεν υποστηρίζεται εδώ. Χρησιμοποίησε τα κουμπιά.'); return; } Rec.listenFor(9000, null); };
+const ANS = { done: 'done', good: 'good', more: 'more', stuck: 'stuck', pause: 'pause', skip: 'skip', tipok: 'tipok' };
+$('#view-run').addEventListener('click', e => { const b = e.target.closest('[data-ans]'); if (b) applyIntent(ANS[b.dataset.ans], 5); });
+$('#view-done').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  if (b.dataset.act === 'again') { const s = R.seq; R = null; startRun(s); } else { R = null; UI.show('home'); }
+});
+
+/* επεξεργασία: γεγονότα */
+const ev = $('#view-edit');
+ev.addEventListener('input', e => {
+  const q = ED.seq, t = e.target;
+  if (t.id === 'e-name') { q.name = t.value; save(); return; }
+  const row = t.closest('.task'); if (!row) return;
+  const task = q.tasks.find(x => x.id === row.dataset.id);
+  if (t.classList.contains('t-name')) { task.name = t.value; if (!task.typeManual) task.type = detectType(task.name); refreshRow(row); save(); }
+  else if (t.classList.contains('t-min')) { const v = parseInt(t.value, 10); if (v > 0) { task.minutes = clamp(v, 1, 240); refreshRow(row); save(); } }
+});
+ev.addEventListener('change', e => {
+  const t = e.target, row = t.closest('.task');
+  if (t.classList.contains('type-sel') && row) { const task = ED.seq.tasks.find(x => x.id === row.dataset.id); task.type = t.value; task.typeManual = true; refreshRow(row); save(); }
+  else if (t.classList.contains('t-min') && row) { const task = ED.seq.tasks.find(x => x.id === row.dataset.id); task.minutes = clamp(parseInt(t.value, 10) || 1, 1, 240); t.value = task.minutes; refreshRow(row); save(); }
+  else if (t.dataset.act === 'own' && row) { const task = ED.seq.tasks.find(x => x.id === row.dataset.id); task.alerts = t.checked ? cloneAlerts(ED.seq.alerts) : null; ED.open.add(task.id); save(); renderEdit(); }
+});
+ev.addEventListener('toggle', e => { const d = e.target; if (d.tagName === 'DETAILS') { const row = d.closest('.task'); if (row) { if (d.open) ED.open.add(row.dataset.id); else ED.open.delete(row.dataset.id); } } }, true);
+const custKey = e => { if (e.key === 'Enter' && e.target.matches('.cust input')) { e.preventDefault(); e.target.parentElement.querySelector('button').click(); } };
+function custVal(btn) { const n = parseInt(btn.parentElement.querySelector('input').value, 10); if (!(n >= 1 && n <= 240)) { UI.toast('Γράψε λεπτά, από 1 έως 240.'); return 0; } return n; }
+function refreshAddLabels() { const n = S.settings.addMin || 5; $('#b-more').textContent = '+' + n + ' λεπτά'; const t = $('#tipcard [data-ans="more"]'); if (t) t.textContent = '+' + n + ' λεπτά'; }
+ev.addEventListener('keydown', custKey);
+ev.addEventListener('click', e => {
+  const q = ED.seq, ca = e.target.closest('[data-cuadd]');
+  if (ca) {
+    const n = custVal(ca); if (!n) return; const k = ca.dataset.cuadd;
+    if (k === 'brk') q.breakMin = n;
+    else { const c = cfgFor(ca.dataset.scope); if (!c) return; if (k === 'checkin') c.checkin = n; else { const key = [10, 5, 2, 1].includes(n) ? 'r' + n : 'c' + n; if (!c.marks.includes(key)) c.marks.push(key); } }
+    save(); renderEdit(); return;
+  }
+  const ae = e.target.closest('[data-ae]');
+  if (ae) {
+    const k = ae.dataset.ae, v = ae.dataset.v;
+    if (k === 'sound') { S.settings.sound = v; save(); audioCtx(); playSound('end', v); renderEdit(); return; }
+    const c = cfgFor(ae.dataset.scope); if (!c) return;
+    if (k === 'mode') c.mode = v; else if (k === 'checkin') c.checkin = parseInt(v, 10);
+    else if (k === 'mark') { const i = c.marks.indexOf(v); if (i >= 0) c.marks.splice(i, 1); else c.marks.push(v); }
+    save(); renderEdit(); return;
+  }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const row = b.closest('.task'), task = row && q.tasks.find(x => x.id === row.dataset.id), a = b.dataset.act;
+  if (a === 'add') { const t = { id: uid(), name: '', minutes: 10, type: 'general', typeManual: false, alerts: null }; q.tasks.push(t); save(); renderEdit(); const i = $$('.t-name').pop(); if (i) { i.focus(); i.scrollIntoView({ block: 'center' }); } }
+  else if (a === 'min-' || a === 'min+') { task.minutes = stepMin(task, a === 'min+' ? 1 : -1); $('.t-min', row).value = task.minutes; refreshRow(row); save(); }
+  else if (a === 'sug') { task.minutes = parseInt(b.dataset.m, 10); $('.t-min', row).value = task.minutes; refreshRow(row); save(); }
+  else if (a === 'up' || a === 'down') { const i = q.tasks.indexOf(task), j = a === 'up' ? i - 1 : i + 1; if (j >= 0 && j < q.tasks.length) { [q.tasks[i], q.tasks[j]] = [q.tasks[j], q.tasks[i]]; save(); renderEdit(); } }
+  else if (a === 'del') { q.tasks.splice(q.tasks.indexOf(task), 1); save(); renderEdit(); }
+  else if (a === 'brk') { q.breakMin = parseInt(b.dataset.v, 10); save(); renderEdit(); }
+  else if (a === 'start') { q.tasks = q.tasks.filter(t => t.name.trim()); if (!q.name.trim()) q.name = 'Νέα ακολουθία'; save(); if (!q.tasks.length) { UI.toast('Πρόσθεσε πρώτα μία εργασία.'); renderEdit(); return; } ED = null; startRun(q); }
+  else if (a === 'dup') { cleanupSeq(); const c = JSON.parse(JSON.stringify(q)); c.id = uid(); c.name = (q.name || 'Ακολουθία') + ' (αντίγραφο)'; c.tasks.forEach(t => { t.id = uid(); }); S.sequences.push(c); save(); ED = null; UI.show('home'); UI.toast('Έγινε αντίγραφο.'); }
+  else if (a === 'delseq') askConfirm('Να διαγράψω αυτή την ακολουθία;', 'Ναι, διαγραφή').then(ok => { if (!ok) return; S.sequences = S.sequences.filter(x => x !== q); save(); ED = null; UI.show('home'); });
+});
+
+/* ρυθμίσεις: γεγονότα */
+const sv = $('#view-settings');
+sv.addEventListener('input', e => { const t = e.target, k = t.dataset.set; if (!k) return; if (t.type === 'range') { S.settings[k] = parseFloat(t.value); save(); } });
+sv.addEventListener('change', e => {
+  const t = e.target, k = t.dataset.set;
+  if (t.id === 'imp') { if (t.files[0]) importData(t.files[0]); t.value = ''; return; }
+  if (!k) return;
+  if (k === 'lang') { setLang(t.value); renderSettings(); return; }
+  if (t.type === 'checkbox') {
+    S.settings[k] = t.checked; save();
+    if (k === 'notify' && t.checked && 'Notification' in window) { try { Notification.requestPermission(); } catch (x) { } }
+    if (k === 'listen') { audioCtx(); if (t.checked && Rec.ok) UI.toast('Η ακρόαση ξεκινά όταν τρέξεις μια ακολουθία.'); }
+  } else if (t.tagName === 'SELECT') { S.settings[k] = t.value; save(); }
+});
+sv.addEventListener('keydown', custKey);
+sv.addEventListener('click', e => {
+  const ca = e.target.closest('[data-cuadd]'); if (ca) { const n = custVal(ca); if (n) { S.settings.addMin = n; save(); refreshAddLabels(); renderSettings(); } return; }
+  const am = e.target.closest('[data-ae="addmin"]'); if (am) { S.settings.addMin = parseInt(am.dataset.v, 10); save(); refreshAddLabels(); renderSettings(); return; }
+  const s = e.target.closest('[data-set][data-v]'); if (s) { S.settings[s.dataset.set] = s.dataset.v; save(); renderSettings(); return; }
+  const ae = e.target.closest('[data-ae="sound"]'); if (ae) { S.settings.sound = ae.dataset.v; save(); audioCtx(); playSound('end', ae.dataset.v); renderSettings(); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'test-voice') { audioCtx(); speak('Γεια σου! Είμαι εδώ, δίπλα σου.', { cancel: true }); }
+  else if (a === 'test-mic') micTest();
+  else if (a === 'export') exportData();
+  else if (a === 'reset-history') askConfirm('Να διαγράψω το ιστορικό διάρκειας;', 'Ναι, διαγραφή').then(ok => { if (ok) { S.history = []; save(); renderSettings(); } });
+});
+
+/* συντομεύσεις πληκτρολογίου στην εκτέλεση */
+document.addEventListener('keydown', e => {
+  if (view !== 'run' || !R || R.finished || e.target.closest('input,select,textarea') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!$('#modal').hidden) return;
+  const it = curItem();
+  if (e.code === 'Space') { e.preventDefault(); if (it.status === 'paused') resumeRun(); else pauseRun(false); }
+  else if (e.code === 'KeyD') applyIntent('done');
+  else if (e.code === 'KeyM') addTime(S.settings.addMin || 5);
+  else if (e.code === 'KeyR') sayRemaining();
+  else if (e.code === 'Escape') UI.askStop(false);
+});
+window.addEventListener('beforeunload', e => { if (R && !R.finished) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ============ εκκίνηση ============ */
+window.__dp = { speak: (...a) => speak(...a), NATIVE, toEn, enMode, setLang, classify, detectType, get S() { return S; }, get R() { return R; }, EV, classify, classifyAlts, detectType, predict, parseMinutes, norm, tick, itemRemaining, setNow(fn) { nowFn = fn || (() => Date.now()); }, startRun, applyIntent, handleHeard, Rec, UI, finishCurrent, TYPES };
+refreshAddLabels(); UI.show('home'); trStart(); UI.micState(); UI.refreshNote();
+})();
+</script>
+</body>
+</html>

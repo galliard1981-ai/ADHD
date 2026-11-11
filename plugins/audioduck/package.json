@@ -1,0 +1,9 @@
+{
+  "name": "capacitor-audioduck",
+  "version": "1.0.0",
+  "description": "Εστίαση ήχου Android: χαμηλώνει ή σταματά τη μουσική άλλων εφαρμογών",
+  "main": "index.js",
+  "files": ["android/", "index.js"],
+  "capacitor": { "android": { "src": "android" } },
+  "peerDependencies": { "@capacitor/core": ">=7.0.0" }
+}
