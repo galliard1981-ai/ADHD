@@ -23,6 +23,10 @@ jobs:
         run: npx cap add android
       - name: Δικαιώματα και αναζήτηση φωνής
         run: python3 scripts/patch_manifest.py
+      - name: Εικονίδιο
+        run: |
+          pip install pillow --break-system-packages || pip install pillow
+          python3 scripts/apply_icons.py
       - name: Συγχρονισμός
         run: npx cap sync android
       - name: Build (debug APK)
