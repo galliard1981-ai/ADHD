@@ -128,11 +128,13 @@ details.al>summary{cursor:pointer;color:var(--lav-d);font-weight:800;font-size:1
 #run-next{text-align:center;color:var(--muted);font-size:14px;margin-top:6px}
 .run-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
 .run-actions .btn{padding:0 8px}
+.run-actions .adj{font-size:20px;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.run-actions #b-skip{grid-column:1/-1;min-height:44px}
 .run-actions .big{grid-column:1/-1;min-height:60px;font-size:19px}
 .mic-row{display:flex;align-items:center;gap:12px;margin-top:16px}
 .mic-row .heard{flex:1;color:var(--ink2);font-size:14px;min-height:22px}
 .mic-row .btn.listening{background:var(--coral-d);color:#fff}
-.hints{margin-top:14px;color:var(--ink2);font-size:13px;text-align:center}
+.info h3{font-size:16px;font-weight:800;margin:16px 2px 6px}.info ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}.info li{background:var(--paper);border:2px solid var(--slate);border-radius:14px;padding:9px 12px;font-size:14px;line-height:1.45}.info p{background:var(--cream);border:2px dashed var(--slate);border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.5;margin:0}
 .checkin,.tipcard{border:2px solid var(--slate);background:var(--paper);border-radius:20px;box-shadow:0 4px 0 var(--lav);padding:14px;margin-top:16px;animation:pop .22s ease-out}
 .tipcard{background:var(--cream);border-style:dashed}
 .checkin p,.tipcard p{font-size:17px;font-weight:800;margin-bottom:12px}
@@ -218,6 +220,7 @@ input[type=range]{width:100%;accent-color:var(--coral-d);min-height:36px}
   <header class="top">
     <button class="icon" id="btn-back" hidden aria-label="Πίσω">‹</button>
     <h1 id="title">The Pi Helper</h1>
+    <button class="icon" id="btn-info" aria-label="Πληροφορίες">ⓘ</button>
     <button class="icon" id="btn-settings" aria-label="Ρυθμίσεις">⚙</button>
   </header>
   <div id="support-note" class="note warn" hidden></div>
@@ -266,19 +269,21 @@ input[type=range]{width:100%;accent-color:var(--coral-d);min-height:36px}
 
       <div class="run-actions">
         <button class="btn ok big" id="b-done">✓ Τελείωσα</button>
+        <button class="btn adj" id="b-less" aria-label="Λιγότερος χρόνος">−1′</button>
         <button class="btn" id="b-pause">Παύση</button>
-        <button class="btn" id="b-more">+5 λεπτά</button>
-        <button class="btn" id="b-skip">Παράλειψη</button>
+        <button class="btn adj" id="b-more" aria-label="Περισσότερος χρόνος">+1′</button>
+        <button class="btn ghost" id="b-skip">Παράλειψη</button>
       </div>
       <div class="mic-row">
-        <button class="btn sm" id="b-mic">🎤 Μίλα</button>
+        <button class="btn sm" id="b-mic" aria-pressed="false">🎤 Ακρόαση: κλειστή</button>
+        <button class="btn sm ghost" id="b-help" aria-label="Πληροφορίες">ⓘ</button>
         <div class="heard" id="heard" aria-live="polite"></div>
       </div>
-      <div class="hints" id="hints">Πες: «παύση», «συνέχεια», «τελείωσα», «πρόσθεσε πέντε λεπτά», «πόσο έμεινε»</div>
     </section>
 
     <section id="view-done" class="view" hidden></section>
     <section id="view-settings" class="view" hidden></section>
+    <section id="view-info" class="view" hidden></section>
   </main>
   </div>
 </div>
@@ -387,42 +392,60 @@ function parseMinutes(t) {
   return clamp(total, 1, 60);
 }
 const P = {
-  stopall: L(['σταματα τα παντα', 'σταματα ολα', 'σταματησε ολα', 'τελος ακολουθιας', 'ακυρωση', 'ακυρωσε', 'τερμα την ακολουθια', 'φτανει για σημερα']),
-  stuck: L(['κολλησα', 'δεν ξερω', 'δυσκολευομαι', 'δεν μπορω', 'δεν ξεκιν', 'βαριεμαι', 'βαρεθηκα', 'δεν εχω ορεξη', 'χαθηκα', 'μπερδευτηκα', 'δυσκολο', 'βοηθεια', 'βοηθησε', 'αγχωθηκα', 'αγχωνομαι', 'δεν αντεχω', 'παγωσα']),
-  mid: L(['ετσι κι ετσι', 'ετσι και ετσι', 'μετρια', 'σιγα σιγα', 'ουτε καλα ουτε κακα']),
-  remaining: L(['ποσο εμεινε', 'ποσο μενει', 'ποσος χρονος', 'ποσα λεπτα', 'ποση ωρα', 'ποσο ακομα', 'ποσο απομενει', 'ποσο χρονο εχω', 'τι χρονο εχω']),
-  skip: L(['παραληψη', 'παραλειψε', 'προσπερασε', 'ασε το', 'αστο', 'προσπερνα']),
-  restart: L(['απο την αρχη', 'ξαναρχισε', 'ξεκινα ξανα', 'επανεκκινηση']),
-  resume: L(['συνεχισε', 'συνεχεια', 'συνεχιζουμε', 'γυρισα', 'επεστρεψα', 'ξεκινα', 'παμε', 'ετοιμ']),
-  pause: L(['παυση', 'σταματα', 'σταματησε', 'στασου', 'περιμενε', 'περιμενετε', 'μισο λεπτο', 'μια στιγμη', 'στιγμη', 'διακοπη', 'χτυπαει', 'με ζητανε', 'με φωναζουν', 'εκτακτο']),
-  brk: L(['διαλειμμα', 'ξεκουραση', 'κουραστηκα', 'κουραζομαι', 'θελω να ξεκουραστω']),
+  stopall: L(['σταματα τα παντα', 'σταματα ολα', 'σταματησε ολα', 'τελος ακολουθιας', 'ακυρωση', 'ακυρωσε', 'τερμα την ακολουθια', 'φτανει για σημερα', 'κλεισε τα ολα', 'κλεισε την ακολουθια', 'ακυρωσε την ακολουθια', 'σταματα την ακολουθια', 'σταματησε την ακολουθια', 'τερματισμος', 'τα παρατω', 'φτανει πια', 'σταματα ολο', 'διακοπη ακολουθιας']),
+  stuck: L(['κολλησα', 'δεν ξερω', 'δυσκολευομαι', 'δεν μπορω', 'δεν ξεκιν', 'βαριεμαι', 'βαρεθηκα', 'δεν εχω ορεξη', 'χαθηκα', 'μπερδευτηκα', 'δυσκολο', 'βοηθεια', 'βοηθησε', 'αγχωθηκα', 'αγχωνομαι', 'δεν αντεχω', 'παγωσα', 'δεν καταλαβαινω', 'χαμενος', 'χαμενη', 'δεν ξερω τι να κανω', 'απο που να ξεκινησω', 'δεν μπορω να ξεκινησω', 'βοηθα με', 'χρειαζομαι βοηθεια', 'δεν παει', 'δεν προχωραει', 'τι κανω τωρα', 'ποιο ειναι το επομενο βημα', 'μπλοκαρα', 'εχω μπλοκαρει', 'δεν συγκεντρωνομαι', 'αποσπαστηκα', 'εχασα τον ειρμο']),
+  mid: L(['ετσι κι ετσι', 'ετσι και ετσι', 'μετρια', 'σιγα σιγα', 'ουτε καλα ουτε κακα', 'οχι και τοσο καλα', 'λιγο δυσκολα', 'πανω κατω', 'μεσα εξω', 'δεν ειμαι σιγουρος', 'περιπου', 'καπως', 'ετσι ετσι', 'μια το κανω']),
+  remaining: L(['ποσο εμεινε', 'ποσο μενει', 'ποσος χρονος', 'ποσα λεπτα', 'ποση ωρα', 'ποσο ακομα', 'ποσο απομενει', 'ποσο χρονο εχω', 'τι χρονο εχω', 'ποσο εχω', 'ποσο μου μενει', 'ποσα μου μενουν', 'ποσα μενουν', 'ποσο χρονο μου μενει', 'ποσο καιρο', 'ποσο εμεινε ακομα', 'ποση ωρα εχω', 'ποσα δευτερολεπτα', 'ποση ωρα μενει', 'ποση ωρα ακομα', 'ποσο εχει μεινει', 'ποσο εχει απομεινει', 'ποσο απομενει ακομα', 'ποσες ωρες', 'πες μου τον χρονο', 'τι μενει', 'ποσο χρονο εχω ακομα', 'τσεκ χρονου', 'ποσο λιγο']),
+  skip: L(['παραληψη', 'παραλειψε', 'προσπερασε', 'ασε το', 'αστο', 'προσπερνα', 'προσπερνω', 'περασε το', 'αφησε το', 'δεν θελω αυτο', 'παρακαμψε', 'αμελησε', 'ξεχασε το', 'πηγαινε στο επομενο', 'αλλαγη εργασιας']),
+  restart: L(['απο την αρχη', 'ξαναρχισε', 'ξεκινα ξανα', 'επανεκκινηση', 'ξανα απ την αρχη', 'απ την αρχη', 'ξεκινα απ την αρχη', 'ξαναξεκινα', 'ξεκινησε ξανα', 'μηδενισε', 'μηδενισμος', 'ξαναρχιζω', 'απο την αρχη παλι']),
+  resume: L(['συνεχισε', 'συνεχεια', 'συνεχιζουμε', 'γυρισα', 'επεστρεψα', 'ξεκινα', 'παμε', 'ετοιμ', 'συνεχιζω', 'πάμε παλι', 'παμε παλι', 'τραβα', 'ωραια παμε', 'συνεχισε παρακαλω', 'ξαναρχισαμε', 'επιστρεψα', 'γυρισα πισω', 'ειμαι εδω', 'ετοιμος', 'ετοιμη', 'ξεκινησε', 'συνεχεια παρακαλω']),
+  pause: L(['παυση', 'σταματα', 'σταματησε', 'στασου', 'περιμενε', 'περιμενετε', 'μισο λεπτο', 'μια στιγμη', 'στιγμη', 'διακοπη', 'χτυπαει', 'με ζητανε', 'με φωναζουν', 'εκτακτο', 'στοπαρε', 'στασου μια στιγμη', 'περιμενε λιγο', 'κανε παυση', 'παυση παρακαλω', 'κρατησε', 'ασε με λιγο', 'δευτερολεπτο', 'ενα δευτερολεπτο', 'περιμενε ενα λεπτο', 'περιμενε ενα δευτερολεπτο', 'πρεπει να φυγω', 'θα επιστρεψω']),
+  brk: L(['διαλειμμα', 'ξεκουραση', 'κουραστηκα', 'κουραζομαι', 'θελω να ξεκουραστω', 'διαλλειμα', 'ξεκουραστω', 'παρε μια ανασα', 'θελω διαλειμμα', 'ξεκουραζομαι', 'αναπαυση', 'ανασα', 'τουαλετα', 'καφε', 'νερο', 'παω τουαλετα', 'θα φαω', 'πεινασα', 'διψασα']),
   next: L(['επομενο', 'παμε στο επομενο']),
-  done: L(['τελειωσα', 'τελειωσε', 'ολοκληρωσα', 'εγινε', 'το εκανα', 'τελος', 'ετοιμ']),
-  good: L(['καλα', 'μια χαρα', 'ωραια', 'προχωραει', 'παει καλα', 'πανε καλα', 'παω καλα', 'ολα καλα', 'ευκολα', 'κανονικα', 'ενταξει', 'οκ', 'ok'])
+  done: L(['τελειωσα', 'τελειωσε', 'ολοκληρωσα', 'εγινε', 'το εκανα', 'τελος', 'ετοιμ', 'ετοιμο', 'τελειωνω', 'τελειωσαμε', 'ολοκληρωθηκε', 'το τελειωσα', 'τα καταφερα', 'εκανα', 'περασε', 'παμε επομενο', 'πανε στο επομενο', 'τελειωσε η εργασια', 'ολοκληρωμενο', 'εχει γινει', 'ετοιμασα', 'εφτιαξα']),
+  good: L(['καλα', 'μια χαρα', 'ωραια', 'προχωραει', 'παει καλα', 'πανε καλα', 'παω καλα', 'ολα καλα', 'ευκολα', 'κανονικα', 'ενταξει', 'οκ', 'ok', 'τελεια', 'φοβερα', 'υπεροχα', 'μπραβο', 'προχωραω', 'παω μια χαρα', 'ολα ωραια', 'πανε ολα καλα', 'ειμαι ενταξει', 'ολα οκ', 'παει τελεια', 'πολυ καλα', 'τα καταφερνω', 'ολα υπεροχα', 'νιωθω καλα', 'κουλ', 'αψογα', 'ευκολο'])
 };
 const EN_P = {
-  stopall: ['stop everything', 'stop all', 'cancel everything', 'end sequence', 'end the sequence', 'stop the sequence', 'that s enough for today', 'quit'],
-  stuck: ['i m stuck', 'i am stuck', 'stuck', 'i don t know', 'i can t', 'can t start', 'struggling', 'this is hard', 'too hard', 'help', 'overwhelmed', 'bored', 'i m lost', 'confused', 'don t feel like'],
-  mid: ['so so', 'not bad', 'slowly', 'kind of', 'sort of', 'meh', 'okay ish'],
-  remaining: ['how much time', 'how much is left', 'how much left', 'time left', 'how long', 'how many minutes', 'time remaining', 'what s left'],
-  skip: ['skip', 'leave it', 'pass on'],
-  restart: ['start over', 'restart', 'from the beginning', 'begin again'],
-  resume: ['resume', 'continue', 'i m back', 'i am back', 'go on', 'carry on', 'let s go', 'ready'],
-  pause: ['pause', 'wait', 'hold on', 'hold up', 'one moment', 'one sec', 'just a sec', 'just a minute', 'give me a minute', 'stop', 'interrupt', 'phone', 'someone s calling', 'urgent'],
-  brk: ['break', 'rest', 'i m tired', 'tired', 'need a rest', 'take a break'],
+  stopall: ['stop everything', 'stop all', 'cancel everything', 'end sequence', 'end the sequence', 'stop the sequence', 'that s enough for today', 'quit', 'cancel', 'abort', 'exit', 'end it', 'stop it all', 'shut it down', 'i quit', 'i give up', 'close it', 'enough', 'that s enough', 'cancel the sequence', 'abort sequence', 'end everything', 'finish everything', 'stop everything now'],
+  stuck: ['i m stuck', 'i am stuck', 'stuck', 'i don t know', 'i can t', 'can t start', 'struggling', 'this is hard', 'too hard', 'help', 'overwhelmed', 'bored', 'i m lost', 'confused', 'don t feel like', 'help me', 'i need help', 'where do i start', 'what do i do', 'don t know where to start', 'i m blocked', 'blocked', 'no idea', 'can t focus', 'distracted', 'lost', 'i can t do this', 'not sure what to do', 'what next', 'sos'],
+  mid: ['so so', 'not bad', 'slowly', 'kind of', 'sort of', 'meh', 'okay ish', 'average', 'medium', 'half and half', 'could be better', 'not great', 'up and down', 'bit slow', 'so-so', 'not so good'],
+  remaining: ['how much time', 'how much is left', 'how much left', 'time left', 'how long', 'how many minutes', 'time remaining', 'what s left', 'how much do i have', 'how much more', 'time do i have', 'how many left', 'remaining', 'time check', 'what time is left', 'how much longer', 'how long left', 'how long to go', 'how much time left', 'how much time is left', 'tell me the time', 'whats the time left', 'minutes left', 'seconds left', 'any time left', 'how much have i got', 'how long have i got', 'how much time do i have left'],
+  skip: ['skip', 'leave it', 'pass on', 'skip it', 'skip this', 'move on', 'forget it', 'not this one', 'next task', 'skip task', 'let it go', 'drop it'],
+  restart: ['start over', 'restart', 'from the beginning', 'begin again', 'reset', 'from the top', 'start again', 'redo', 'one more time', 'try again', 'restart it', 'start from scratch'],
+  resume: ['resume', 'continue', 'i m back', 'i am back', 'go on', 'carry on', 'let s go', 'ready', 'go ahead', 'let s go', 'lets go', 'keep going', 'back on', 'okay go', 'alright go', 'continue please', 'resume please', 'get going', 'i m ready', 'i am ready', 'back to work', 'unpause'],
+  pause: ['pause', 'wait', 'hold on', 'hold up', 'one moment', 'one sec', 'just a sec', 'just a minute', 'give me a minute', 'stop', 'interrupt', 'phone', 'someone s calling', 'urgent', 'freeze', 'hold', 'halt', 'time out', 'timeout', 'hang on', 'hang on a sec', 'hold it', 'not now', 'one second', 'wait a moment', 'wait a minute', 'stand by', 'standby', 'pause it', 'stop it', 'stop for a moment', 'back in a moment', 'i ll be right back', 'brb', 'be right back', 'hold on a second'],
+  brk: ['break', 'rest', 'i m tired', 'tired', 'need a rest', 'take a break', 'coffee break', 'bathroom', 'toilet', 'restroom', 'water break', 'i need a break', 'breather', 'take five', 'exhausted', 'take a rest', 'snack', 'i m hungry', 'i m thirsty', 'lunch'],
   next: ['next', 'go to the next'],
-  done: ['done', 'finished', 'i finished', 'completed', 'all done', 'finish', 'that s it'],
-  good: ['good', 'fine', 'great', 'going well', 'all good', 'easy', 'okay', 'ok', 'alright']
+  done: ['done', 'finished', 'i finished', 'completed', 'all done', 'finish', 'that s it', 'i m done', 'im done', 'nailed it', 'got it done', 'i did it', 'finished it', 'that s done', 'task done', 'it s done', 'it s finished', 'all finished', 'next one', 'move to next', 'go to next'],
+  good: ['good', 'fine', 'great', 'going well', 'all good', 'easy', 'okay', 'ok', 'alright', 'awesome', 'excellent', 'perfect', 'doing great', 'doing well', 'doing fine', 'all fine', 'no problem', 'smooth', 'on track', 'nailing it', 'cool', 'sweet', 'looking good', 'feeling good', 'feeling great', 'it s fine', 'it s good', 'it s easy']
 };
 Object.keys(EN_P).forEach(k => P[k].push(...L(EN_P[k])));
-const MORE_RE = [/(^| )(προσθεσε|παραταση)/, /\+ ?\d/, /(^| )(θελω|χρειαζομαι) ((λιγο|περισσοτερο|περισσοτερη|ακομα|αλλο) )*(χρονο|ακομα|λεπτα|ωρα)/,
+const WP = {
+  resume: L(['go', 'run', 'play', 'start', 'proceed', 'resume', 'continue', 'μπρος', 'εμπρος', 'παμε', 'αντε', 'γκο', 'τρεξε', 'τραβα']),
+  pause: L(['stop', 'στοπ', 'hold', 'halt', 'freeze', 'wait', 'pause', 'παγωσε', 'κρατα', 'αναμονη', 'περιμενε', 'στασου', 'στοπαρε']),
+  done: L(['done', 'next', 'finish', 'complete', 'ετοιμο', 'ετοιμος', 'ετοιμη', 'τελος', 'τελειωσα', 'περασε', 'εκανα']),
+  skip: L(['skip', 'pass', 'σκιπ', 'σκιπαρε', 'παρακαμψε']),
+  restart: L(['reset', 'again', 'redo']),
+  brk: L(['break', 'rest', 'τουαλετα', 'καφε', 'νερο', 'coffee', 'bathroom', 'toilet', 'restroom', 'breather', 'snack']),
+  good: L(['good', 'fine', 'great', 'cool', 'awesome', 'perfect', 'excellent', 'τελεια', 'φοβερα', 'υπεροχα', 'μπραβο', 'ok', 'okay']),
+  mid: L(['meh', 'average', 'μπα', 'μετρια']),
+  stuck: L(['help', 'sos', 'βοηθεια', 'βοηθα', 'stuck', 'lost', 'blocked', 'distracted', 'χαμενος', 'χαμενη', 'κολλησα']),
+  remaining: L(['remaining', 'clock', 'χρονος']),
+  stopall: L(['cancel', 'abort', 'quit', 'exit', 'enough', 'εξοδος', 'φτανει', 'ακυρωση', 'τερμα'])
+};
+const hitW = (t, k) => has(t, P[k] || []) || hasW(t, WP[k] || []);
+const MORE_RE = [/(^| )(παραπανω|περισσοτερα|περισσοτερο|ακομα ενα|ενα ακομα|κι αλλο|και αλλο|κι αλλα|και αλλα|πιο πολυ) (χρονο|λεπτα|λεπτο)/, /(^| )(δωσε|δωστε) (μου )?(χρονο|ακομα|λεπτα)/, /(^| )(μεγαλωσε|αυξησε|επιμηκυνε|ανεβασε|αργησα)/, /(^| )(increase|prolong|top up|bump)( |$)/, /(^| )(another|one more|an extra|extra) (minutes?|mins?|time)/, /(^| )(few|couple( of)?|some) more (minutes?|mins?)/, /(^| )more (minutes?|mins?)/, /(^| )(add|give me) (some )?time/, /(^| )(προσθεσε|παραταση)/, /\+ ?\d/, /(^| )(θελω|χρειαζομαι) ((λιγο|περισσοτερο|περισσοτερη|ακομα|αλλο) )*(χρονο|ακομα|λεπτα|ωρα)/,
   /(^| )(αλλα|ακομα|βαλε) (\d+|[α-ω]+) (λεπτα|λεπτο)/, /(^| )(αλλα|ακομα|βαλε) \d+/, /λιγο ακομα/, /δεν προλαβ/, /(^| )αργω/, /περισσοτερο χρονο/, /δεν (εχω )?τελειωσ/,
   /(^| )(add|extend|extension)/, /(^| )(i )?(need|want) (a )?((little|bit|some|more|extra|another) )*(time|minutes|mins?)/, /(^| )(another|more|give me|add|put) (\d+|[a-z]+) (minutes?|mins?)/, /a (little|bit) more/, /(^| )more time/, /running (late|behind)/, /(not|n t) (finished|done)/];
+const LESS_RE = [/(^| )(πλην|μειον|minus)( |$)/, /(^| )(ελαττωσε|μικρυνε|συντομευσε|κουρτεψε|shorten|trim|knock off|shave off|lower the|fewer minutes|drop (it )?(by )?\d)/, /(^| )πιο λιγο χρονο/, /(^| )(αφαιρεσε|αφαιρεση|αφαιρω|βγαλε|βγαλτε|κοψε|μειωσε|μειωση|κατεβασε)/, /(^| )(λιγοτερο|λιγοτερα) (χρονο|λεπτα)/, /(^| )(remove|subtract|take off|take away|take out|cut|reduce|decrease|minus|less time)/, /(^| )(i )?(need|want) (a )?((little|bit) )?less time/];
+const WAKE_RE = /^(?:(?:hey|ok|okay|ey|ε|ωπα) )?(?:pi|pie|pee|pea|p i|πι|π|δε ?π(?:υ|ι|η|ει)|ντε ?π(?:υ|ι|η|ει)|de ?pi|d ?p ?i)(?: |$)/;
+function stripWake(t) { const m = WAKE_RE.exec(t); return m ? { t: t.slice(m[0].length).trim(), hit: true } : { t, hit: false }; }
 const NEG_GOOD = /(^| )(οχι|δεν) ((παει|πανε|παω|παιζει) )?καλα|(^| )(not|no) (going )?(well|good|great)|(^| )(it s |i m )?not (so )?(good|well)/;
-const CONT_OK = new Set(['pause', 'resume', 'done', 'skip', 'more', 'remaining', 'stopall', 'restart', 'break']);
+const CONT_OK = new Set(['pause', 'resume', 'done', 'skip', 'more', 'less', 'remaining', 'stopall', 'restart', 'break']);
 
 function classify(raw, ctx = {}) {
-  const t = norm(raw); if (!t) return null;
+  let t = norm(raw); if (!t) return null;
+  if (!ctx.confirm) { const w = stripWake(t); if (w.hit) { t = w.t; ctx = Object.assign({}, ctx, { window: true }); if (!t) return null; } }
   if (ctx.confirm) {
     if (hasW(t, ['ναι', 'οκ', 'ok', 'ενταξει', 'σωστα', 'βεβαια', 'σταματα', 'yes', 'yeah', 'yep', 'sure', 'okay', 'right', 'stop', ...YES_X])) return { intent: 'yes' };
     if (has(t, ['οχι', 'μην', 'no', 'don t', 'not', ...NO_X])) return { intent: 'no' };
@@ -431,19 +454,20 @@ function classify(raw, ctx = {}) {
   if (!ctx.window && t.split(' ').length > 6) return null;
   let r = null;
   const mins = () => parseMinutes(t);
-  if (has(t, P.stopall)) r = { intent: 'stopall' };
-  else if (MORE_RE.some(re => re.test(t))) r = { intent: 'more', minutes: mins() || 0 };
-  else if (NEG_GOOD.test(t) || has(t, P.mid)) r = { intent: 'mid' };
-  else if (has(t, P.stuck)) r = { intent: 'stuck' };
-  else if (has(t, P.remaining)) r = { intent: 'remaining' };
-  else if (has(t, P.skip)) r = { intent: 'skip' };
-  else if (has(t, P.restart)) r = { intent: 'restart' };
+  if (hitW(t, 'stopall')) r = { intent: 'stopall' };
+  else if (LESS_RE.some(re => re.test(t))) r = { intent: 'less', minutes: mins() || 0 };
+  else if (MORE_RE.some(re => re.test(t)) || (/(^| )(βαλε|βαζε|βαλτε|συν|plus)( |$)/.test(t) && mins())) r = { intent: 'more', minutes: mins() || 0 };
+  else if (NEG_GOOD.test(t) || hitW(t, 'mid')) r = { intent: 'mid' };
+  else if (hitW(t, 'stuck')) r = { intent: 'stuck' };
+  else if (hitW(t, 'remaining')) r = { intent: 'remaining' };
+  else if (hitW(t, 'skip')) r = { intent: 'skip' };
+  else if (hitW(t, 'restart')) r = { intent: 'restart' };
   else if (has(t, P.next)) r = { intent: 'done' };
-  else if (ctx.paused && has(t, P.resume)) r = { intent: 'resume' };
-  else if (has(t, P.pause)) r = { intent: 'pause' };
-  else if (has(t, P.brk)) r = { intent: 'break' };
-  else if (has(t, P.done)) r = { intent: 'done' };
-  else if (has(t, P.good)) r = { intent: 'good' };
+  else if (ctx.paused && hitW(t, 'resume')) r = { intent: 'resume' };
+  else if (hitW(t, 'pause')) r = { intent: 'pause' };
+  else if (hitW(t, 'brk')) r = { intent: 'break' };
+  else if (hitW(t, 'done')) r = { intent: 'done' };
+  else if (hitW(t, 'good')) r = { intent: 'good' };
   if (r && !ctx.window && !CONT_OK.has(r.intent)) return null;
   return r;
 }
@@ -567,7 +591,6 @@ const EN_RULES = [
   [/^Παύση\..*$/, "Paused. I'm here when you're back."],
   [/^Εντάξει, πάρε διάλειμμα\..*$/, "Okay, take a break. I'm here when you're back."],
   [/^Είμαι εδώ όταν γυρίσεις\..*$/, "I'm here when you're back."],
-  [/^Εντάξει, πρόσθεσα (.+)\.$/, 'Okay, added $1.'],
   [/^Από την αρχή\.$/, 'From the start.'],
   [/^Κανένα πρόβλημα, συμβαίνει\..*$/, 'No problem, it happens. Try the tip on the screen.'],
   [/^Τελείωσε η ακολουθία\. Ολοκλήρωσες (\d+) από (\d+) .*$/, 'Sequence finished. You completed $1 of $2 tasks. Well done!'],
@@ -582,6 +605,7 @@ function toEn(text) {
   let t = text;
   if (typeof R !== 'undefined' && R) R.items.forEach(it => { if (it.name && it.kind === 'task') t = t.split(it.name).join(EN_TYPE[it.type] || 'this task'); });
   let m = /^Είμαστε στη μέση\. (.+)$/.exec(t); if (m) return "We're halfway. " + toEn(m[1]);
+  m = /^Εντάξει, (πρόσθεσα|αφαίρεσα) (.+?)\. (.+)$/.exec(t); if (m) return 'Okay, ' + (m[1] === 'πρόσθεσα' ? 'added ' : 'removed ') + toEn(m[2] + '.').replace(/\.$/, '') + '. ' + toEn(m[3]);
   m = /^(.+)\. Συνεχίζουμε\.$/.exec(t); if (m) return toEn(m[1] + '.') + ' Back to it.';
   for (const [re, rep] of EN_RULES) if (re.test(t)) { t = t.replace(re, rep); break; }
   return t.replace(/(\d+) δευτερόλεπτα/g, '$1 seconds').replace(/(\d+) λεπτά/g, '$1 minutes').replace(/1 λεπτό/g, '1 minute').replace(/1 ώρα/g, '1 hour').replace(/(\d+) ώρες/g, '$1 hours').replace(/ και /g, ' and ');
@@ -666,6 +690,12 @@ function remPhrase(ms) {
   if (ms < 90000) return 'Απομένουν ' + Math.max(5, Math.round(ms / 5000) * 5) + ' δευτερόλεπτα';
   const m = Math.round(ms / 60000);
   return (m === 1 || m === 60 ? 'Απομένει ' : 'Απομένουν ') + durPhrase(m);
+}
+function remExact(ms) {
+  if (ms < 90000 || ms >= 600000) return remPhrase(ms);
+  let m = Math.floor(ms / 60000), s = Math.round((ms - m * 60000) / 5000) * 5;
+  if (s === 60) { m++; s = 0; }
+  return s === 0 ? remPhrase(m * 60000) : 'Απομένουν ' + minPhrase(m) + ' και ' + s + ' δευτερόλεπτα';
 }
 function fmtClock(ms) { const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); }
 const PH = {
@@ -757,7 +787,7 @@ function tick() {
     if (!f.up) { f.up = true; timeUp(it, c.marks.includes('end')); } else overtimeTick(it, rem);
     return;
   }
-  if (due.length) { due.sort((a, b) => a.p - b.p); due.forEach(d => { f[d.k] = true; }); feedback(alertText(it, due[0].k, rem), kindOf(due[0].k), { mode: c.mode }); }
+  if (due.length) { due.sort((a, b) => a.p - b.p); due.forEach(d => { f[d.k] = true; }); feedback(alertText(it, due[0].k, rem), kindOf(due[0].k), { mode: c.mode }); if (S.settings.listen && Rec.ok) Rec.listenFor(12000, null); }
   if (it.nextCheck !== null && el >= it.nextCheck) {
     while (el >= it.nextCheck) it.nextCheck += c.checkin * 60000;
     if (!due.length && rem > 90000 && !UI.checkinOpen()) askCheckin(it);
@@ -796,6 +826,7 @@ function applyIntent(intent, minutes) {
     case 'done': finishCurrent('done'); break;
     case 'skip': finishCurrent('skipped'); break;
     case 'more': addTime(minutes || S.settings.addMin || 5); break;
+    case 'less': subTime(minutes || 1); break;
     case 'remaining': sayRemaining(); break;
     case 'restart': restartItem(); break;
     case 'stuck': onStuck(); break;
@@ -815,19 +846,33 @@ function pauseRun(isBreak) {
 function resumeRun() {
   const it = curItem(); if (!it || it.status !== 'paused') return;
   it.lastTs = now(); it.status = 'running';
-  feedback(remPhrase(itemRemaining(it)) + '. Συνεχίζουμε.', 'start');
+  feedback(remExact(itemRemaining(it)) + '. Συνεχίζουμε.', 'start');
   syncListen(); UI.renderRun();
 }
-function addTime(n) {
+function addTime(n, quiet) {
   const it = curItem(); if (!it || (it.status !== 'running' && it.status !== 'paused')) return;
   n = clamp(Math.round(n), 1, 60);
   it.extra += n * 60000; const rem = itemRemaining(it);
   [10, 5, 2, 1].forEach(m => { if (it.fired['r' + m] && rem > m * 60000) delete it.fired['r' + m]; });
   delete it.fired.up; it.overNext = 120000; it.overCount = 0; it.autoAt = 0;
-  UI.closeCheckin(); UI.hideTip(); Rec.cancelWindow();
-  feedback(`Εντάξει, πρόσθεσα ${minPhrase(n)}.`, 'ask'); UI.renderRun();
+  UI.closeCheckin(); UI.hideTip(); if (!quiet) Rec.cancelWindow();
+  if (!quiet) feedback(`Εντάξει, πρόσθεσα ${minPhrase(n)}. ${remExact(rem)}.`, 'ask');
+  UI.renderRun();
 }
-function sayRemaining() { const it = curItem(); if (!it) return; const t = remPhrase(itemRemaining(it)) + '.'; feedback(t, 'ask'); UI.toast(t); }
+function subTime(n, quiet) {
+  const it = curItem(); if (!it || (it.status !== 'running' && it.status !== 'paused')) return;
+  n = clamp(Math.round(n), 1, 60);
+  const cur = itemRemaining(it); if (cur <= 0) return;
+  const cut = Math.min(n * 60000, cur); it.extra -= cut; const rem = itemRemaining(it);
+  [10, 5, 2, 1].forEach(m => { if (rem <= m * 60000) it.fired['r' + m] = true; });
+  it.alerts.marks.forEach(k => { const mm = /^c(\d+)$/.exec(k); if (mm && rem <= +mm[1] * 60000) it.fired[k] = true; });
+  it.fired.half = true;
+  UI.closeCheckin(); UI.hideTip(); if (!quiet) Rec.cancelWindow();
+  if (!quiet) feedback(`Εντάξει, αφαίρεσα ${minPhrase(Math.round(cut / 60000) || 1)}. ${remExact(rem)}.`, 'ask');
+  UI.renderRun();
+}
+function adjustTime(d) { if (d > 0) addTime(d, true); else subTime(-d, true); }
+function sayRemaining() { const it = curItem(); if (!it) return; const t = remExact(itemRemaining(it)) + '.'; feedback(t, 'ask'); UI.toast(t); }
 function restartItem() {
   const it = curItem(); if (!it) return;
   Object.assign(it, { elapsed: 0, extra: 0, lastTs: now(), status: 'running', fired: {}, overNext: 120000, overCount: 0, autoAt: 0 });
@@ -902,7 +947,7 @@ const EN_UI = {
   'Περισσότερα λεπτά': 'More minutes', 'Είδος εργασίας': 'Task type', 'Πάνω': 'Up', 'Κάτω': 'Down', 'Διαγραφή εργασίας': 'Delete task', '(δικές της)': '(its own)', 'Δικές της ειδοποιήσεις': 'Its own alerts', 'Ισχύουν οι ειδοποιήσεις της ακολουθίας.': "The sequence's alerts apply.",
   'Όνομα ακολουθίας': 'Sequence name', 'π.χ. Συγύρισμα κουζίνας': 'e.g. Tidy the kitchen', 'Εργασίες': 'Tasks', '+ Προσθήκη εργασίας': '+ Add task', 'Διάλειμμα ανάμεσα στις εργασίες': 'Break between tasks', 'Κανένα': 'None', 'Έναρξη ακολουθίας': 'Start sequence', 'Αντίγραφο': 'Copy', 'Διαγραφή': 'Delete',
   'Φωνή': 'Voice', 'Αυτόματη': 'Automatic', 'Ταχύτητα': 'Speed', 'Ένταση': 'Volume', 'Δοκιμή φωνής': 'Test voice', 'Ήχος ειδοποιήσεων': 'Alert sound', 'Δόνηση': 'Vibration', 'Σε κινητό, μαζί με τον ήχο': 'On a phone, together with the sound',
-  'Φωνητικές εντολές': 'Voice commands', 'Να ακούει συνεχώς όσο τρέχει η ακολουθία': 'Keep listening while a sequence runs', 'Αλλιώς ακούει μόνο όταν ρωτάει ή όταν πατήσεις «Μίλα»': 'Otherwise it listens only when it asks, or when you press “Speak”', 'Δοκιμή μικροφώνου': 'Test microphone',
+  'Φωνητικές εντολές': 'Voice commands', 'Να ακούει συνεχώς όσο τρέχει η ακολουθία': 'Keep listening while a sequence runs', 'Αλλιώς ακούει μόνο όταν ρωτάει. Το ίδιο κουμπί υπάρχει και στην οθόνη της ακολουθίας.': 'Otherwise it listens only when it asks. The same button is on the sequence screen.', '🎤 Ακρόαση: ενεργή': '🎤 Listening: on', '🎤 Ακρόαση: κλειστή': '🎤 Listening: off', 'Ακούω συνεχώς μέχρι να το κλείσεις.': 'I will keep listening until you turn it off.', 'Η ακρόαση έκλεισε.': 'Listening is off.', 'Δοκιμή μικροφώνου': 'Test microphone',
   'Πόσο χρόνο προσθέτει το «+»': 'How much time “+” adds', 'Όταν τελειώνει ο χρόνος': 'When time runs out', 'Ρώτα με': 'Ask me', 'Επόμενη εργασία': 'Next task', 'Οθόνη και ειδοποιήσεις': 'Screen and notifications', 'Να μένει αναμμένη η οθόνη': 'Keep the screen on', 'Όσο τρέχει μια ακολουθία': 'While a sequence runs',
   'Ειδοποιήσεις συστήματος': 'System notifications', 'Όταν η εφαρμογή είναι στο παρασκήνιο': 'When the app is in the background', 'Μάθηση διάρκειας': 'Learning durations', 'Διαγραφή ιστορικού': 'Delete history', 'Αντίγραφο ασφαλείας': 'Backup', 'Αποθήκευση αρχείου': 'Save to file', 'Επαναφορά': 'Restore',
   'Δεν υποστηρίζεται σε αυτό το πρόγραμμα περιήγησης.': 'Not supported in this browser.', 'Ακούω. Πες π.χ. «πρόσθεσε πέντε λεπτά».': 'Listening. Say e.g. “add five minutes”.', '→ δεν αντιστοιχεί σε εντολή': '→ does not match a command', 'Δεν άκουσα τίποτα. Έλεγξε το μικρόφωνο.': 'I heard nothing. Check the microphone.',
@@ -918,6 +963,22 @@ const EN_UI = {
   'Πλυντήριο ρούχων': 'Laundry', 'Μάζεμα ρούχων': 'Gather clothes', 'Φόρτωμα πλυντηρίου': 'Load the washer', 'Άπλωμα': 'Hang to dry', 'Δίπλωμα': 'Fold',
   'Γρήγορο συγύρισμα σαλονιού': 'Quick living room tidy', 'Μάζεμα πραγμάτων': 'Pick things up', 'Ξεσκόνισμα': 'Dusting', 'Σκούπισμα': 'Sweeping',
   'Βραδινή ρουτίνα': 'Evening routine', 'Ετοιμασία για αύριο': 'Prepare for tomorrow', 'Περιποίηση': 'Self-care', 'Ηρεμία πριν τον ύπνο': 'Wind down before bed',
+  'Πληροφορίες': 'Info', 'Για καλύτερη απόκριση': 'For better response', 'Ακρόαση': 'Listening', 'Χρόνος': 'Time', 'Πλήκτρα στον υπολογιστή': 'Keyboard shortcuts', 'Λιγότερος χρόνος': 'Less time', 'Περισσότερος χρόνος': 'More time',
+  'Χρόνος όταν πεις «πρόσθεσε» χωρίς αριθμό': 'Time added when you say “add” with no number',
+  'Παύση: «παύση», «στοπ», «στάσου», «περίμενε», «κράτα»': 'Pause: “pause”, “stop”, “wait”, “hold on”, “freeze”',
+  'Συνέχεια: «συνέχισε», «πάμε», «μπρος», «γύρισα»': 'Resume: “resume”, “continue”, “go”, “run”, “I’m back”',
+  'Τελείωσα: «τελείωσα», «έγινε», «έτοιμο», «επόμενο»': 'Done: “done”, “finished”, “next”, “nailed it”',
+  'Παράλειψη: «παράλειψε», «άσε το», «σκιπ», «προσπέρνα»': 'Skip: “skip”, “leave it”, “move on”, “forget it”',
+  'Προσθήκη χρόνου: «πρόσθεσε», «βάλε» ή «συν» και τα λεπτά, π.χ. «βάλε πέντε λεπτά»': 'Add time: “add”, “put” or “plus” and the minutes, e.g. “add five minutes”',
+  'Αφαίρεση χρόνου: «αφαίρεσε», «βγάλε» ή «πλην» και τα λεπτά, π.χ. «βγάλε δύο λεπτά»': 'Remove time: “remove”, “take off” or “minus” and the minutes, e.g. “remove two minutes”',
+  'Πόσο μένει: «πόσο μένει», «πόσο έχω ακόμα», «πόσα λεπτά μένουν», «πόσο ακόμα»': 'Time left: “how much is left”, “how much time do I have”, “how much longer”, “time check”',
+  'Από την αρχή: «ξαναρχίσε», «απ την αρχή»': 'Restart: “start over”, “reset”, “from the top”',
+  'Όλη η ακολουθία: «σταμάτα τα πάντα», «ακύρωση», «φτάνει πια»': 'Whole sequence: “stop everything”, “cancel”, “quit”',
+  'Πώς πάει: «πάω καλά», «τέλεια», «έτσι κι έτσι», «κόλλησα», «βοήθα με»': 'How it is going: “going well”, “awesome”, “so so”, “I’m stuck”, “help me”',
+  'Πες «δέπυ» πριν την εντολή, π.χ. «δέπυ, παύση». Στα αγγλικά: «Pi, pause». Χωρίς πρόθεμα η εφαρμογή δέχεται μόνο σύντομες, σαφείς εντολές, ώστε η μουσική ή οι κουβέντες γύρω σου να μην την μπερδεύουν. Μετά από κάθε ειδοποίηση χρόνου ακούει πιο προσεκτικά για λίγα δευτερόλεπτα.': 'Say “Pi” before the command, e.g. “Pi, pause”. Without the prefix the app accepts only short, clear commands, so music or talk around you does not confuse it. After each time alert it listens more carefully for a few seconds.',
+  'Το κουμπί «Ακρόαση» κρατά το μικρόφωνο ανοιχτό σε όλη την ακολουθία, μέχρι να το κλείσεις. Στο Android, όταν ακούσει φωνή, η μουσική σταματά ή χαμηλώνει (από τις Ρυθμίσεις) και επανέρχεται μόλις τελειώσεις.': 'The Listening button keeps the microphone open for the whole sequence until you turn it off. On Android, when it hears a voice, music stops or gets quieter (see Settings) and returns when you finish.',
+  'Τα κουμπιά −1′ και +1′ αλλάζουν τον χρόνο της τρέχουσας εργασίας κατά ένα λεπτό ανά πάτημα. Κράτα πατημένο για γρηγορότερη αλλαγή.': 'The −1′ and +1′ buttons change the time of the current task by one minute per tap. Hold to change faster.',
+  'Space: παύση και συνέχεια': 'Space: pause and resume', 'D: τελείωσα': 'D: done', 'M: προσθήκη χρόνου': 'M: add time', 'R: πόσο μένει': 'R: time left', 'Esc: σταμάτημα': 'Esc: stop',
   'Συγύρισμα κουζίνας': 'Tidy the kitchen', 'Μάζεμα πιάτων και ποτηριών': 'Collect plates and glasses', 'Πλύσιμο πιάτων': 'Wash the dishes', 'Καθάρισμα πάγκου': 'Wipe the counter', 'Σκουπίδια': 'Take out the trash',
   'Διοικητικά του πρωινού': 'Morning admin', 'Απάντηση σε email': 'Answer emails', 'Λογαριασμοί': 'Bills', 'Τηλεφωνήματα': 'Phone calls',
   'Έναρξη_': 'Start', 'Στη μέση': 'Halfway', 'Λήξη': 'End', '10′ πριν': '10′ before', '5′ πριν': '5′ before', '2′ πριν': '2′ before', '1′ πριν': '1′ before', 'Όχι': 'No',
@@ -932,7 +993,7 @@ const EN_UI = {
   'Βάλε παπούτσια και πάρε τα κλειδιά. Μόνο αυτό.': 'Put on your shoes and take your keys. Just that.', 'Διάλεξε ένα συρτάρι ή ένα σημείο και ξεκίνα από εκεί.': 'Pick one drawer or one spot and start there.',
   'Κάνε το πιο μικρό βήμα που σκέφτεσαι, για δύο λεπτά.': 'Do the smallest step you can think of, for two minutes.'
 };
-const EN_TOK = [[/(\d+) από (\d+)/g, '$1 of $2'], [/(\d+) δευτερόλεπτα/g, '$1 seconds'], [/1 λεπτό/g, '1 minute'], [/(\d+) λεπτά/g, '$1 minutes'], [/1 ώρα/g, '1 hour'], [/(\d+) ώρες/g, '$1 hours'], [/(hours?) και /g, '$1 and '], [/(\d+) εργασίες/g, '$1 tasks'], [/1 εργασία/g, '1 task']];
+const EN_TOK = [[/(\d+) από (\d+)/g, '$1 of $2'], [/(\d+) δευτερόλεπτα/g, '$1 seconds'], [/1 λεπτό/g, '1 minute'], [/(\d+) λεπτά/g, '$1 minutes'], [/1 ώρα/g, '1 hour'], [/(\d+) ώρες/g, '$1 hours'], [/(hours?|minutes?) και /g, '$1 and '], [/(\d+) εργασίες/g, '$1 tasks'], [/1 εργασία/g, '1 task']];
 const EN_UI_RULES = [
   [/^Εργασία (\d+) από (\d+)$/, 'Task $1 of $2'],
   [/^Ολοκλήρωσες (\d+) από (\d+)\.$/, 'You completed $1 of $2.'],
@@ -951,7 +1012,7 @@ function trPhrase(s) {
   if (EN_UI[s] !== undefined) return EN_UI[s];
   const em = /^([^\p{L}\p{N}+]+\s)(.+)$/u.exec(s); if (em && EN_UI[em[2]] !== undefined) return em[1] + EN_UI[em[2]];
   for (const [re, rep] of EN_UI_RULES) if (re.test(s)) return s.replace(re, rep);
-  for (const [re, rep] of EN_RULES) if (re.test(s)) return s.replace(re, rep);
+  for (const [re, rep] of EN_RULES) if (re.test(s)) { let o = s.replace(re, rep); for (const [r2, p2] of EN_TOK) o = o.replace(r2, p2); return o; }
   let t = s; for (const [re, rep] of EN_TOK) t = t.replace(re, rep);
   return t;
 }
@@ -1069,12 +1130,21 @@ Object.keys(XP).forEach(c => {
    Όταν περιμένει την απάντησή σου, η μουσική σταματά, χαμηλώνει ή μένει ως έχει, ανάλογα με τη ρύθμιση. */
 const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const NP = NATIVE ? (window.Capacitor.Plugins || {}) : {};
-let duckMode = null;
+let duckMode = null, voiceOn = false, voiceCool = 0, voiceT1 = null, voiceT2 = null;
+/* Όταν το Android ανιχνεύσει φωνή, η μουσική σταματά ή χαμηλώνει μόνο όσο διαρκεί η ομιλία (το πολύ 4 δευτερόλεπτα), και μετά ξαναπαίζει. */
+function voiceStart() {
+  if (voiceOn || now() < voiceCool || S.settings.musicListen === 'none') return;
+  voiceOn = true; clearTimeout(voiceT1); voiceT1 = setTimeout(voiceEnd, 4000); duckRefresh();
+}
+function voiceEnd() {
+  if (!voiceOn) return; clearTimeout(voiceT1); clearTimeout(voiceT2);
+  voiceT2 = setTimeout(() => { voiceOn = false; voiceCool = now() + 1500; duckRefresh(); }, 600);
+}
 function duckRefresh() {
   if (!NATIVE || !NP.AudioDuck) return;
   let m = null;
   if (speaking > 0) m = 'duck';
-  else if (Rec.inWindow && !Rec.disabledReason && S.settings.musicListen !== 'none') m = S.settings.musicListen === 'duck' ? 'duck' : 'exclusive';
+  else if ((Rec.inWindow || voiceOn) && !Rec.disabledReason && S.settings.musicListen !== 'none') m = S.settings.musicListen === 'duck' ? 'duck' : 'exclusive';
   if (m === duckMode) return; duckMode = m;
   try { (m ? NP.AudioDuck.request({ mode: m }) : NP.AudioDuck.abandon()).catch(() => { }); } catch (e) { }
 }
@@ -1095,6 +1165,7 @@ if (NATIVE && NP.TextToSpeech) {
 if (NATIVE && NP.SpeechRecognition) {
   let permOk = null, avOk = null;
   Rec.ok = true; Rec.disabledReason = '';
+  try { NP.SpeechRecognition.addListener('listeningState', ev => { if (!ev) return; if (ev.status === 'started') voiceStart(); else if (ev.status === 'stopped') voiceEnd(); }); } catch (e) { }
   const syncOrig = Rec.sync.bind(Rec);
   Rec.sync = function () { syncOrig(); duckRefresh(); };
   Rec.start = function () {
@@ -1128,7 +1199,7 @@ if (NATIVE && NP.SpeechRecognition) {
 if (NATIVE) { try { document.documentElement.classList.add('native'); } catch (e) { } }
 
 /* ============ διεπαφή ============ */
-const VIEWS = ['home', 'edit', 'run', 'done', 'settings'];
+const VIEWS = ['home', 'edit', 'run', 'done', 'settings', 'info'];
 const INTENT_L = { done: 'Τελείωσα', pause: 'Παύση', break: 'Διάλειμμα', resume: 'Συνέχεια', skip: 'Παράλειψη', more: 'Πρόσθεσε χρόνο', remaining: 'Πόσο έμεινε', restart: 'Από την αρχή', stuck: 'Κόλλησα', good: 'Πάω καλά', mid: 'Έτσι κι έτσι', stopall: 'Σταμάτημα ακολουθίας' };
 let view = 'home', prevView = 'home', ED = null, ck = { open: false, sticky: false }, stopOpen = false, modalRes = null;
 
@@ -1143,14 +1214,16 @@ function closeModal(v) { $('#modal').hidden = true; const r = modalRes; modalRes
 const UI = {
   _note: '', _tt: 0, _ht: 0,
   show(v) {
-    if (v === 'settings') prevView = view !== 'settings' ? view : prevView;
+    if (v === 'settings' || v === 'info') prevView = (view !== 'settings' && view !== 'info') ? view : prevView;
     view = v; VIEWS.forEach(x => { $('#view-' + x).hidden = x !== v; });
     document.body.dataset.view = v;
     $('#btn-back').hidden = (v === 'home' || v === 'run' || v === 'done');
-    $('#btn-settings').hidden = (v === 'settings' || v === 'run');
-    $('#title').textContent = { home: 'The Pi Helper', edit: 'Ακολουθία', settings: 'Ρυθμίσεις', done: 'The Pi Helper', run: '' }[v];
+    $('#btn-settings').hidden = (v === 'settings' || v === 'run' || v === 'info');
+    $('#btn-info').hidden = (v === 'info' || v === 'run');
+    $('#title').textContent = { home: 'The Pi Helper', edit: 'Ακολουθία', settings: 'Ρυθμίσεις', info: 'Πληροφορίες', done: 'The Pi Helper', run: '' }[v];
     if (v === 'home') { renderHome(); document.title = 'The Pi Helper'; }
     if (v === 'settings') renderSettings();
+    if (v === 'info') renderInfo();
     UI.refreshNote(); window.scrollTo(0, 0);
   },
   toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(UI._tt); UI._tt = setTimeout(() => el.classList.remove('on'), 2600); },
@@ -1166,7 +1239,7 @@ const UI = {
     const b = $('#b-mic'); if (!b) return;
     if (!Rec.ok) { b.disabled = true; b.textContent = '🎤 Μη διαθέσιμο'; }
     else if (Rec.disabledReason) { b.disabled = true; b.textContent = '🎤 Χωρίς άδεια'; }
-    else { b.disabled = false; const on = !!Rec.inst; b.classList.toggle('listening', on); b.textContent = on ? '🎤 Ακούω…' : '🎤 Μίλα'; }
+    else { b.disabled = false; const on = !!S.settings.listen; b.classList.toggle('listening', on); b.setAttribute('aria-pressed', on); b.textContent = on ? '🎤 Ακρόαση: ενεργή' : '🎤 Ακρόαση: κλειστή'; }
     const l = $('#ck-listen'); if (l) l.hidden = !(ck.open && Rec.inst);
   },
   heard(t) { const h = $('#heard'); h.textContent = 'Άκουσα: «' + t + '»'; clearTimeout(UI._ht); UI._ht = setTimeout(() => { h.textContent = ''; }, 6000); },
@@ -1194,7 +1267,6 @@ const UI = {
     $('#run-next').textContent = nx ? 'Επόμενο: ' + nx.name + ', ' + durPhrase(nx.minutes) : 'Αυτή είναι η τελευταία εργασία.';
     const paused = it.status === 'paused', bp = $('#b-pause');
     bp.textContent = paused ? 'Συνέχεια' : 'Παύση'; bp.classList.toggle('primary', paused);
-    $('#hints').hidden = !Rec.ok;
     $('#view-run').dataset.st = paused ? 'paused' : (itemRemaining(it) <= 0 ? 'over' : 'running');
     UI.micState(); UI.updateRun();
   },
@@ -1222,6 +1294,26 @@ const UI = {
   }
 };
 
+const INFO = [
+  ['Φωνητικές εντολές', 'ul', [
+    'Παύση: «παύση», «στοπ», «στάσου», «περίμενε», «κράτα»',
+    'Συνέχεια: «συνέχισε», «πάμε», «μπρος», «γύρισα»',
+    'Τελείωσα: «τελείωσα», «έγινε», «έτοιμο», «επόμενο»',
+    'Παράλειψη: «παράλειψε», «άσε το», «σκιπ», «προσπέρνα»',
+    'Προσθήκη χρόνου: «πρόσθεσε», «βάλε» ή «συν» και τα λεπτά, π.χ. «βάλε πέντε λεπτά»',
+    'Αφαίρεση χρόνου: «αφαίρεσε», «βγάλε» ή «πλην» και τα λεπτά, π.χ. «βγάλε δύο λεπτά»',
+    'Πόσο μένει: «πόσο μένει», «πόσο έχω ακόμα», «πόσα λεπτά μένουν», «πόσο ακόμα»',
+    'Από την αρχή: «ξαναρχίσε», «απ την αρχή»',
+    'Όλη η ακολουθία: «σταμάτα τα πάντα», «ακύρωση», «φτάνει πια»',
+    'Πώς πάει: «πάω καλά», «τέλεια», «έτσι κι έτσι», «κόλλησα», «βοήθα με»']],
+  ['Για καλύτερη απόκριση', 'p', ['Πες «δέπυ» πριν την εντολή, π.χ. «δέπυ, παύση». Στα αγγλικά: «Pi, pause». Χωρίς πρόθεμα η εφαρμογή δέχεται μόνο σύντομες, σαφείς εντολές, ώστε η μουσική ή οι κουβέντες γύρω σου να μην την μπερδεύουν. Μετά από κάθε ειδοποίηση χρόνου ακούει πιο προσεκτικά για λίγα δευτερόλεπτα.']],
+  ['Ακρόαση', 'p', ['Το κουμπί «Ακρόαση» κρατά το μικρόφωνο ανοιχτό σε όλη την ακολουθία, μέχρι να το κλείσεις. Στο Android, όταν ακούσει φωνή, η μουσική σταματά ή χαμηλώνει (από τις Ρυθμίσεις) και επανέρχεται μόλις τελειώσεις.']],
+  ['Χρόνος', 'p', ['Τα κουμπιά −1′ και +1′ αλλάζουν τον χρόνο της τρέχουσας εργασίας κατά ένα λεπτό ανά πάτημα. Κράτα πατημένο για γρηγορότερη αλλαγή.']],
+  ['Πλήκτρα στον υπολογιστή', 'ul', ['Space: παύση και συνέχεια', 'D: τελείωσα', 'M: προσθήκη χρόνου', 'R: πόσο μένει', 'Esc: σταμάτημα']]
+];
+function renderInfo() {
+  $('#view-info').innerHTML = '<div class="info">' + INFO.map(([h, k, items]) => `<h3>${h}</h3>` + (k === 'ul' ? '<ul>' + items.map(x => `<li>${x}</li>`).join('') + '</ul>' : items.map(x => `<p>${x}</p>`).join(''))).join('') + '</div>';
+}
 /* ---- αρχική ---- */
 const seqTotal = q => q.tasks.reduce((a, t) => a + t.minutes, 0) + (q.breakMin || 0) * Math.max(0, q.tasks.length - 1);
 window.__dpVoices = () => { if (!$('#view-home').hidden) renderHome(); };
@@ -1322,9 +1414,9 @@ function renderSettings() {
       <div class="s-row"><div class="l">Όταν η εφαρμογή μιλάει</div><span class="mute small">χαμηλώνει</span></div>
       <div class="s-row"><div class="l">Όταν ακούει την απάντησή σου</div><select class="type-sel" data-set="musicListen" style="max-width:55%">${[['pause', 'Σταματά'], ['duck', 'Χαμηλώνει'], ['none', 'Δεν αλλάζει']].map(([v, l]) => `<option value="${v}" ${st.musicListen === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>` : ''}
     <div class="panel"><h3>Φωνητικές εντολές</h3>
-      ${sw('listen', 'Να ακούει συνεχώς όσο τρέχει η ακολουθία', 'Αλλιώς ακούει μόνο όταν ρωτάει ή όταν πατήσεις «Μίλα»')}
+      ${sw('listen', 'Να ακούει συνεχώς όσο τρέχει η ακολουθία', 'Αλλιώς ακούει μόνο όταν ρωτάει. Το ίδιο κουμπί υπάρχει και στην οθόνη της ακολουθίας.')}
       <button class="btn sm" data-act="test-mic" style="margin-top:8px">Δοκιμή μικροφώνου</button><p class="mute small" id="mic-out" style="margin-top:8px"></p></div>
-    <div class="panel"><h3>Πόσο χρόνο προσθέτει το «+»</h3>
+    <div class="panel"><h3>Χρόνος όταν πεις «πρόσθεσε» χωρίς αριθμό</h3>
       <div class="seg">${[3, 5, 10, ...([3, 5, 10].includes(st.addMin) ? [] : [st.addMin])].map(v => `<button type="button" aria-pressed="${st.addMin === v}" data-ae="addmin" data-v="${v}">${v}′</button>`).join('')}</div>
       <div class="row" style="margin-top:8px">${custIn('addmin', '', '′')}</div></div>
     <div class="panel"><h3>Όταν τελειώνει ο χρόνος</h3>
@@ -1361,7 +1453,7 @@ function importData(file) {
 
 /* ---- συνδέσεις γεγονότων ---- */
 $('#btn-settings').onclick = () => UI.show('settings');
-$('#btn-back').onclick = () => { if (view === 'edit') leaveEdit(); else UI.show(prevView === 'edit' || prevView === 'settings' ? 'home' : prevView); };
+$('#btn-back').onclick = () => { if (view === 'edit') leaveEdit(); else { const pv = (prevView === 'edit' || prevView === 'settings' || prevView === 'info') ? 'home' : prevView; UI.show(pv); if (pv === 'run' && R && !R.finished) UI.renderRun(); } };
 function newSeqFrom(tp) {
   const L = x => S.settings.lang === 'el' ? x : trTo(x);
   const q = tp ? { id: uid(), name: L(tp.name), breakMin: tp.breakMin || 0, alerts: cloneAlerts(DEFAULT_ALERTS), tasks: tp.tasks.map(([n, m]) => ({ id: uid(), name: L(n), minutes: m, type: detectType(n), typeManual: false, alerts: null })) }
@@ -1384,10 +1476,22 @@ $('#modal-yes').onclick = () => closeModal(true);
 $('#modal-no').onclick = () => closeModal(false);
 $('#b-done').onclick = () => applyIntent('done');
 $('#b-pause').onclick = () => { const it = curItem(); if (it && it.status === 'paused') resumeRun(); else pauseRun(false); };
-$('#b-more').onclick = () => addTime(S.settings.addMin || 5);
+(() => {
+  const bind = (id, sign) => {
+    const b = $('#' + id); let t1 = null, t2 = null, n = 0;
+    const step = () => { n++; adjustTime(sign * (n > 12 ? 5 : 1)); };
+    const stop = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; };
+    b.addEventListener('pointerdown', e => { e.preventDefault(); audioCtx(); n = 0; step(); t1 = setTimeout(() => { t2 = setInterval(step, 140); }, 450); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+    b.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); adjustTime(sign); } });
+  };
+  bind('b-less', -1); bind('b-more', 1);
+})();
+$('#btn-info').onclick = () => UI.show('info');
+$('#b-help').onclick = () => UI.show('info');
 $('#b-skip').onclick = () => applyIntent('skip');
 $('#btn-stop').onclick = () => UI.askStop(false);
-$('#b-mic').onclick = () => { audioCtx(); if (!Rec.ok) { UI.toast('Η φωνή δεν υποστηρίζεται εδώ. Χρησιμοποίησε τα κουμπιά.'); return; } Rec.listenFor(9000, null); };
+$('#b-mic').onclick = () => { audioCtx(); if (!Rec.ok) { UI.toast('Η φωνή δεν υποστηρίζεται εδώ. Χρησιμοποίησε τα κουμπιά.'); return; } S.settings.listen = !S.settings.listen; save(); syncListen(); UI.micState(); UI.toast(S.settings.listen ? 'Ακούω συνεχώς μέχρι να το κλείσεις.' : 'Η ακρόαση έκλεισε.'); };
 const ANS = { done: 'done', good: 'good', more: 'more', stuck: 'stuck', pause: 'pause', skip: 'skip', tipok: 'tipok' };
 $('#view-run').addEventListener('click', e => { const b = e.target.closest('[data-ans]'); if (b) applyIntent(ANS[b.dataset.ans], 5); });
 $('#view-done').addEventListener('click', e => {
@@ -1414,7 +1518,7 @@ ev.addEventListener('change', e => {
 ev.addEventListener('toggle', e => { const d = e.target; if (d.tagName === 'DETAILS') { const row = d.closest('.task'); if (row) { if (d.open) ED.open.add(row.dataset.id); else ED.open.delete(row.dataset.id); } } }, true);
 const custKey = e => { if (e.key === 'Enter' && e.target.matches('.cust input')) { e.preventDefault(); e.target.parentElement.querySelector('button').click(); } };
 function custVal(btn) { const n = parseInt(btn.parentElement.querySelector('input').value, 10); if (!(n >= 1 && n <= 240)) { UI.toast('Γράψε λεπτά, από 1 έως 240.'); return 0; } return n; }
-function refreshAddLabels() { const n = S.settings.addMin || 5; $('#b-more').textContent = '+' + n + ' λεπτά'; const t = $('#tipcard [data-ans="more"]'); if (t) t.textContent = '+' + n + ' λεπτά'; }
+function refreshAddLabels() { const n = S.settings.addMin || 5; const t = $('#tipcard [data-ans="more"]'); if (t) t.textContent = '+' + n + ' λεπτά'; }
 ev.addEventListener('keydown', custKey);
 ev.addEventListener('click', e => {
   const q = ED.seq, ca = e.target.closest('[data-cuadd]');
